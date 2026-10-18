@@ -1,6 +1,6 @@
 # CLAUDE.md — AutoSense AI project context
 
-> **Last updated:** 2026-10-18 — v1.0.0+6 Google Play Ready: Signed Release `.aab` (`AutoSense-AI-v1.0.0+6-release-signed.aab`), live HTTPS Privacy Policy & Terms (`https://autosense-api.vercel.app/privacy` & `/terms`), Freemium + AutoSense Pro (`EGP 99/mo` & `EGP 999/yr` + 3-day trial), 56-code SAE J2012 catalog (`P`/`B`/`C`/`U`), 35 global car brands, Hybrid Smart Mode (`<5ms` offline engine + cloud API), 140 passing tests, and verified on both Pixel 7 emulator (`emulator-5554`) and wireless Samsung tablet (`GT-N8000`).
+> **Last updated:** 2026-10-18 — v1.0.0+6 `$0` Public Launch + Automated InstaPay Pro Verification: Live Web App PWA (`https://yassinahmed14.github.io/autosense-ai/`), Download Portal (`https://yassinahmed14.github.io/autosense-ai/download.html`), Direct Signed APK (`https://github.com/yassinahmed14/autosense-ai/releases/download/v1.0.0/AutoSense-AI-v1.0.0+6-release-signed.apk`), Signed Google Play `.aab`, Automated InstaPay Screenshot Proof -> Instant Promo Code (`https://ipn.eg/S/youssefabdelrehim2004/instapay/5i0M8U`, `youssefabdelrehim2004@instapay`), 56-code SAE J2012 catalog, 35 car brands, and 141 passing tests.
 >
 > This file is the project's "memory". AI agents read it automatically
 > (via `AGENTS.md`) and **must update it after every meaningful change**.
@@ -15,7 +15,8 @@ scanner into your car (or use the built-in simulator), and the app:
 - supports 35 global car brands (1900–present) across North American, European, Asian, and EV/Hybrid makes,
 - runs in **Hybrid Smart Mode** (cloud API first, with automatic `<5ms` on-device offline fallback for underground garages or Wi-Fi OBD adapters),
 - shows a live dashboard (RPM, speed, coolant, throttle) and pre-inspection emissions readiness guide,
-- estimates power from a 10-second acceleration run and converts horsepower ↔ torque.
+- estimates power from a 10-second acceleration run and converts horsepower ↔ torque,
+- verifies **InstaPay screenshot proof + reference numbers** on-device (`youssefabdelrehim2004@instapay`) to automatically issue a customer's unique `ASPRO-...` promo code and unlock AutoSense Pro with `0%` commission.
 
 It gives **preliminary guidance only** — never a definitive diagnosis.
 
@@ -30,14 +31,17 @@ It gives **preliminary guidance only** — never a definitive diagnosis.
 
 | Item | Status |
 |---|---|
-| App version | **1.0.0+6** (Freemium + AutoSense Pro: `EGP 99/mo` or `EGP 999/yr` + 3-day trial) |
+| App version | **1.0.0+6** (Freemium by default in production + AutoSense Pro: `EGP 99/mo` or `EGP 999/yr` + 3-day trial) |
+| Live Download Portal (`$0`) | **`https://yassinahmed14.github.io/autosense-ai/download.html`** |
+| Live Web App PWA (`$0`) | **`https://yassinahmed14.github.io/autosense-ai/`** (Android, iPhone/iPad, & PC) |
+| Direct Signed Android APK | **`https://github.com/yassinahmed14/autosense-ai/releases/download/v1.0.0/AutoSense-AI-v1.0.0+6-release-signed.apk`** |
+| Official InstaPay Link | **`https://ipn.eg/S/youssefabdelrehim2004/instapay/5i0M8U`** (`youssefabdelrehim2004@instapay`) |
 | API live URL | **`https://autosense-api.vercel.app`** (live & smoke-tested on Vercel Hobby) |
 | Live Legal URLs | **`https://autosense-api.vercel.app/privacy`** & **`https://autosense-api.vercel.app/terms`** (`youssefahmed4010@gmail.com`) |
 | Signed Google Play `.aab` | **`D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-release-signed.aab`** (`52.4 MB`, signed with `autosense-upload.jks`) |
-| Android Debug APK | `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-debug.apk` |
 | Emulator QA | **Passed (0 crashes)** on `emulator-5554` (Pixel 7, API 36, `1080x2400`) |
 | Wireless Tablet QA | **Passed (0 crashes)** on `192.168.100.199:48729` (Samsung `GT-N8000`, Android 11, `1280x800`) |
-| Automated Tests | **140 passed** (`71` FastAPI `pytest` + `69` Flutter unit/widget/protocol tests; `0` lint issues) |
+| Automated Tests | **141 passed** (`71` FastAPI `pytest` + `70` Flutter unit/widget/protocol tests; `0` lint issues) |
 | Bluetooth/Wi‑Fi scanner | BLE + Wi-Fi ELM327 drivers & unit tests verified; physical car ECU test requires plugging adapter into a real car |
 
 ## 3. Repository map
@@ -112,6 +116,7 @@ and npm cache live on `D:\CodexWork\…` (handled by `dev_env.ps1`).
 - 2026-10-18 — **Live Cloud Deployment (A4):** Deployed FastAPI backend to Vercel Hobby (`https://autosense-api.vercel.app`) and verified on both `emulator-5554` and wireless tablet `GT-N8000`.
 - 2026-10-18 — **Freemium + AutoSense Pro Subscription Fee:** Added **Monthly (`EGP 99/month`, ~$2.99/mo)** and **Annual (`EGP 999/year`, ~$24.99/yr, Save 16%)** plans with a **3-day free trial**. Basic DTC lookup (`56 codes`) and HP calculator are always Free; Pro unlocks Live OBD Scanner, Clear Codes, 10s Dyno Run, and Full AI Guidance, with interactive tablet/demo trial controls plus Google Play Billing support.
 - 2026-10-18 — **Google Play Store Package (`prepare google play`):** Generated private Upload Keystore (`D:\AutoSense AI\releases\signing\autosense-upload.jks`), built and verified signed release bundle (`D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-release-signed.aab`), deployed live HTTPS `/privacy` and `/terms` pages on Vercel (`youssefahmed4010@gmail.com`), and updated `distribution/google-play/` with real phone and 10-inch tablet screenshots.
+- 2026-10-18 — **`$0` Public Launch + Automated InstaPay Screenshot Proof (`youssefabdelrehim2004@instapay`):** Published live Web App PWA (`https://yassinahmed14.github.io/autosense-ai/`), Download Portal (`download.html`), and signed Android APK on GitHub Releases (`v1.0.0`) for `$0`. Production builds default to Freemium mode and include an on-device **Automated InstaPay Screenshot Proof Verifier** (`https://ipn.eg/S/youssefabdelrehim2004/instapay/5i0M8U` / `youssefabdelrehim2004@instapay`) that validates the customer's PNG/JPEG/WEBP screenshot bytes + InstaPay reference number, displays their newly generated `ASPRO-...` promo code on screen, and unlocks AutoSense Pro immediately with `0%` commission.
 
 ## 9. Working with the owner
 
@@ -127,6 +132,8 @@ recommended option.
 | **App (frontend)** | What users see and tap on their phone/tablet. Here: Flutter in `app/`. |
 | **API (backend)** | The app's "waiter": the phone asks it a question, it fetches the answer from the server. Here: `api/`. |
 | **Freemium & Paywall** | Giving basic tools for free (like DTC code lookup & HP calculator) so anyone can use the app, while showing an upgrade sheet ("paywall") when someone taps a Pro feature. |
+| **Automated Screenshot Proof + Promo Code** | Customers send `EGP 99` or `EGP 999` via InstaPay (`youssefabdelrehim2004@instapay`), upload their receipt screenshot + reference number inside the app, and the app automatically verifies the image, shows their unique `ASPRO-...` promo code on screen, and unlocks Pro immediately. |
+| **PWA (Progressive Web App)** | A website (`https://yassinahmed14.github.io/autosense-ai/`) that can be installed onto an iPhone, Android, or PC home screen like a real app without needing an app store. |
 | **Upload Keystore (`.jks`)** | Your private digital passport (`autosense-upload.jks`) that stamps your `.aab` file so Google Play knows every update truly comes from you. |
 | **Hybrid Smart Mode (Offline Fallback)** | A backup brain built right inside the app: if your phone has no internet in a garage, the app answers in under 5 milliseconds by itself. |
 | **SAE J2012 (`P`, `B`, `C`, `U` codes)** | The world standard for car trouble codes: **P** = Powertrain (engine/gearbox), **C** = Chassis (ABS/brakes), **B** = Body (airbags), **U** = Network (computer wiring). |
