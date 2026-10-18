@@ -10,15 +10,18 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 export 'package:autosense_ai/features/subscription/domain/subscription_offer_model.dart';
 
-/// Owns Google Play billing state, server-side purchase verification, and
-/// interactive Freemium / Pro trial preview controls for local & tablet testing.
+/// Owns Google Play billing state, Direct Pro Activation Code verification, and
+/// Freemium / 3-day free trial controls.
 class SubscriptionController extends ChangeNotifier {
-  SubscriptionController(this.apiBaseUrl);
+  SubscriptionController(this.apiBaseUrl, {bool? startLocked})
+      : _freemiumGateLocked = startLocked ?? apiBaseUrl.startsWith('https://');
+
   final String apiBaseUrl;
   static const enabled = AppConfig.enableSubscriptions;
   static const productId = 'autosense_pro';
   static const policyUrl = AppConfig.privacyPolicyUrl;
   static const termsUrl = AppConfig.termsUrl;
+  static const supportEmail = AppConfig.supportEmail;
 
   /// Reference pricing for the Monthly base plan.
   static const monthlyPriceLabel = 'EGP 99.00/month (~\$2.99/mo)';
@@ -37,24 +40,31 @@ class SubscriptionController extends ChangeNotifier {
   DateTime? _expires;
   String? _token;
   String? _demoPlan;
-  bool _freemiumGateLocked = false;
+  String? _activatedCode;
+  bool _freemiumGateLocked;
   bool ready = false, busy = false, _closed = false;
   String message =
-      'Freemium mode: Basic DTC lookup & HP calculator are free. Subscribe to AutoSense Pro (EGP 99/month or EGP 999/year with 3-day free trial) for full access.';
+      'Freemium mode: Basic DTC lookup & HP calculator are free. Start your 3-day free trial or enter a Pro Activation Code (EGP 99/month or EGP 999/year) for full access.';
   List<SubscriptionOffer> offers = [];
 
   /// True only when a real Google Play store purchase has been server-verified.
   bool get active => _expires?.isAfter(DateTime.now().toUtc()) ?? false;
 
-  /// True when the interactive tablet/demo 3-day Pro trial is active.
+  /// True when a Direct Pro Activation Code has been verified.
+  bool get licenseCodeActive => _activatedCode != null;
+
+  /// The verified Pro Activation Code, if any.
+  String? get activatedCode => _activatedCode;
+
+  /// True when the interactive 3-day Pro trial or a Direct Pro Activation Code is active.
   bool get demoTrialActive => _demoPlan != null;
 
-  /// Currently selected demo plan (`'monthly'` or `'annual'`), if any.
+  /// Currently selected plan (`'monthly'` or `'annual'`), if any.
   String? get activePlan => _demoPlan;
 
-  /// True when the user switched to strict Free tier to test the Pro paywall lock.
+  /// True when the user is on the Free tier and Pro features are locked behind the paywall.
   bool get freemiumGateLocked =>
-      _freemiumGateLocked && !active && !demoTrialActive;
+      _freemiumGateLocked && !active && !demoTrialActive && !licenseCodeActive;
 
   /// True when Pro features are accessible.
   bool get hasProAccess => !freemiumGateLocked;
@@ -63,7 +73,77 @@ class SubscriptionController extends ChangeNotifier {
     if (!_closed) notifyListeners();
   }
 
-  /// Activates the interactive 3-day Pro trial on tablet/emulator builds.
+  /// Computes a deterministic 4-character hex checksum for a customer Pro Activation Code.
+  ///
+  /// Format: `ASPRO-<M|Y>-<CUSTOMER_ID>-<4HEX>` (e.g. `ASPRO-Y-1001-A9D4`).
+  static String computeCodeChecksum(String planChar, String customerId) {
+    final payload =
+        '${planChar.toUpperCase()}:${customerId.toUpperCase()}:AUTOSENSE_PRO_2026_YOUSSEF';
+    var hash = 0x811c9dc5;
+    for (final unit in payload.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+    }
+    return (hash & 0xFFFF).toRadixString(16).toUpperCase().padLeft(4, '0');
+  }
+
+  /// Generates a complete customer Pro Activation Code for `'monthly'` or `'annual'`.
+  static String generateCustomerCode(String plan, String customerId) {
+    final planChar =
+        plan.toLowerCase().startsWith('a') || plan.toUpperCase() == 'Y'
+            ? 'Y'
+            : 'M';
+    final cleanId =
+        customerId.trim().toUpperCase().replaceAll(RegExp('[^A-Z0-9]'), '');
+    final idPart = cleanId.isEmpty ? '1001' : cleanId;
+    final check = computeCodeChecksum(planChar, idPart);
+    return 'ASPRO-$planChar-$idPart-$check';
+  }
+
+  /// Verifies and activates a Direct Pro Activation Code (InstaPay / Vodafone Cash / Direct).
+  ///
+  /// Returns `true` if the code is valid and unlocks AutoSense Pro, or `false` otherwise.
+  bool activateLicenseCode(String rawCode) {
+    final code = rawCode.trim().toUpperCase();
+    String? matchedPlan;
+
+    if (code == 'ASPRO-M-2026' || code == 'AUTOSENSE-M-99') {
+      matchedPlan = 'monthly';
+    } else if (code == 'ASPRO-Y-2026' || code == 'AUTOSENSE-Y-999') {
+      matchedPlan = 'annual';
+    } else {
+      final parts = code.split('-');
+      if (parts.length == 4 &&
+          parts[0] == 'ASPRO' &&
+          (parts[1] == 'M' || parts[1] == 'Y') &&
+          parts[2].isNotEmpty &&
+          parts[3].length == 4) {
+        final expected = computeCodeChecksum(parts[1], parts[2]);
+        if (parts[3] == expected) {
+          matchedPlan = parts[1] == 'Y' ? 'annual' : 'monthly';
+        }
+      }
+    }
+
+    if (matchedPlan == null) {
+      message =
+          'Invalid Pro Activation Code. Please check your code or contact $supportEmail.';
+      _changed();
+      return false;
+    }
+
+    _activatedCode = code;
+    _demoPlan = matchedPlan;
+    _freemiumGateLocked = false;
+    final price =
+        matchedPlan == 'annual' ? annualPriceLabel : monthlyPriceLabel;
+    message =
+        'AutoSense Pro Activated (${matchedPlan.toUpperCase()} • $price • Code: $code). All Pro tools unlocked!';
+    _changed();
+    return true;
+  }
+
+  /// Activates the 3-day Pro trial on phone/tablet/web builds.
   void activateDemoTrial(String plan) {
     _demoPlan = plan == 'annual' ? 'annual' : 'monthly';
     _freemiumGateLocked = false;
@@ -76,6 +156,7 @@ class SubscriptionController extends ChangeNotifier {
   /// Switches to the locked Free tier so the user can test the Freemium paywall.
   void switchToFreeTier() {
     _demoPlan = null;
+    _activatedCode = null;
     _freemiumGateLocked = true;
     message =
         'Free tier active (EGP 0). Basic DTC lookup & HP calculator are free; Pro tools require AutoSense Pro.';

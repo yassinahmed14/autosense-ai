@@ -296,11 +296,13 @@ DOWNLOAD_HTML = """<!doctype html>
       <span class="badge">AUTOSENSE AI &bull; V1.0.0+6 OFFICIAL RELEASE</span>
       <h1>OBD-II Car Diagnostics, 56-Code Library &amp; Live Telemetry</h1>
       <p class="subtitle">
-        Supports 35 global car brands (1900&ndash;2026), offline &amp; cloud Hybrid Smart Mode (&lt;5ms response),
-        Bluetooth/Wi-Fi ELM327 scanner, and Horsepower/Torque Dyno Estimator.
+        Supports 35 global car brands (1900&ndash;2026), offline &amp; cloud
+        Hybrid Smart Mode (&lt;5ms response), Bluetooth/Wi-Fi ELM327 scanner,
+        and Horsepower/Torque Dyno Estimator.
       </p>
       <div class="cta-row">
-        <a class="btn-primary" href="https://github.com/yassinahmed14/autosense-ai/releases/download/v1.0.0/AutoSense-AI-v1.0.0+6-release-signed.apk">
+        <a class="btn-primary"
+           href="https://github.com/yassinahmed14/autosense-ai/releases/download/v1.0.0/AutoSense-AI-v1.0.0+6-release-signed.apk">
           &#11015; Download Android APK (53.2 MB &bull; Free)
         </a>
         <a class="btn-secondary" href="https://yassinahmed14.github.io/autosense-ai/">
@@ -313,20 +315,31 @@ DOWNLOAD_HTML = """<!doctype html>
       <div class="card">
         <h2>How to Install on Android (Free)</h2>
         <ol>
-          <li>Tap <strong>Download Android APK</strong> above on your Android phone or tablet.</li>
-          <li>Open the downloaded file <code>AutoSense-AI-v1.0.0+6-release-signed.apk</code>.</li>
-          <li>If prompted by Android, tap <strong>Allow from this source</strong> and tap <strong>Install</strong>.</li>
+          <li>Tap <strong>Download Android APK</strong> above on your phone or tablet.</li>
+          <li>Open <code>AutoSense-AI-v1.0.0+6-release-signed.apk</code>.</li>
+          <li>
+            If prompted by Android, tap <strong>Allow from this source</strong>
+            and tap <strong>Install</strong>.
+          </li>
         </ol>
         <p class="meta">
-          Cryptographically signed with the official AutoSense AI release key (<code>com.autosense.autosense_ai</code>).
+          Cryptographically signed with the official AutoSense AI release key
+          (<code>com.autosense.autosense_ai</code>).
         </p>
       </div>
 
       <div class="card">
         <h2>Use on iPhone, iPad, Tablet or PC</h2>
         <ul>
-          <li>Tap <strong>Launch Web App Instantly</strong> above to run AutoSense AI right inside Chrome or Safari.</li>
-          <li><strong>Add to Home Screen:</strong> In Safari (iPhone/iPad) or Chrome (Android), tap <strong>Share &rarr; Add to Home Screen</strong> to install AutoSense AI like a native app with zero store fees.</li>
+          <li>
+            Tap <strong>Launch Web App Instantly</strong> above to run
+            AutoSense AI right inside Chrome or Safari.
+          </li>
+          <li>
+            <strong>Add to Home Screen:</strong> In Safari (iPhone/iPad) or
+            Chrome (Android), tap <strong>Share &rarr; Add to Home Screen</strong>
+            to install AutoSense AI like a native app.
+          </li>
         </ul>
       </div>
     </div>
@@ -334,9 +347,23 @@ DOWNLOAD_HTML = """<!doctype html>
     <div class="card">
       <h2>What's Included in v1.0.0+6</h2>
       <ul>
-        <li><strong>100% Free Core Tools:</strong> 56 verified SAE J2012 trouble codes across Powertrain (<code>P</code>), Chassis/ABS (<code>C</code>), Body/Airbag (<code>B</code>), and Network/CAN (<code>U</code>), plus the bidirectional HP &amp; Torque Calculator.</li>
-        <li><strong>AutoSense Pro (Includes Built-In 3-Day Free Trial):</strong> Live OBD-II Bluetooth &amp; Wi-Fi ELM327 Telemetry Dashboard, Clear Trouble Codes, 10-Second Dyno Power Run, and Full 35-Brand AI Diagnostic Action Plans.</li>
-        <li><strong>Works Offline &amp; Online:</strong> Hybrid Smart Mode connects to our cloud API when online and automatically falls back in under 5 milliseconds to the built-in offline engine in underground garages.</li>
+        <li>
+          <strong>100% Free Core Tools:</strong> 56 verified SAE J2012 trouble
+          codes across Powertrain (<code>P</code>), Chassis/ABS (<code>C</code>),
+          Body/Airbag (<code>B</code>), and Network/CAN (<code>U</code>), plus
+          the bidirectional HP &amp; Torque Calculator.
+        </li>
+        <li>
+          <strong>AutoSense Pro (3-Day Free Trial + Direct Pro Code):</strong>
+          Live OBD-II Bluetooth &amp; Wi-Fi ELM327 Telemetry Dashboard, Clear
+          Trouble Codes, 10-Second Dyno Power Run, and Full 35-Brand AI
+          Diagnostic Action Plans (EGP 99/mo or EGP 999/yr).
+        </li>
+        <li>
+          <strong>Works Offline &amp; Online:</strong> Hybrid Smart Mode
+          connects to our cloud API when online and automatically falls back in
+          under 5 milliseconds to the built-in offline engine.
+        </li>
       </ul>
     </div>
 
@@ -358,4 +385,3 @@ DOWNLOAD_HTML = """<!doctype html>
 def download_portal() -> HTMLResponse:
     """Serve the official $0 APK download and Web App launch portal."""
     return HTMLResponse(content=DOWNLOAD_HTML)
-

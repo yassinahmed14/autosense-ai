@@ -66,4 +66,3 @@ def test_privacy_and_terms_html_endpoints(client):
     assert "text/html" in download.headers["content-type"]
     assert "AutoSense-AI-v1.0.0+6-release-signed.apk" in download.text
     assert "https://yassinahmed14.github.io/autosense-ai/" in download.text
-

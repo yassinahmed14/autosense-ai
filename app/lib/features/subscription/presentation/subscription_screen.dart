@@ -13,9 +13,9 @@ import 'package:flutter/services.dart';
 /// AutoSense Pro membership & Freemium plan selector screen.
 ///
 /// Displays Monthly (`EGP 99.00/month`) and Annual (`EGP 999.00/year`) plans
-/// with a 3-day free trial, Freemium vs. Pro feature comparison, interactive
-/// tablet/demo trial activation, and Google Play billing compliance disclosures.
-class SubscriptionScreen extends StatelessWidget {
+/// with a 3-day free trial, Direct Pro Activation Code redemption (InstaPay /
+/// Vodafone Cash / Direct), Freemium vs. Pro comparison, and Google Play billing.
+class SubscriptionScreen extends StatefulWidget {
   /// Creates the membership screen bound to [controller].
   const SubscriptionScreen({super.key, required this.controller});
 
@@ -29,104 +29,136 @@ class SubscriptionScreen extends StatelessWidget {
     required String featureName,
     required VoidCallback onUnlocked,
   }) async {
+    final codeController = TextEditingController();
+    String? errorText;
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (sheetContext) {
         final theme = Theme.of(sheetContext);
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xxl,
-              AppSpacing.sm,
-              AppSpacing.xxl,
-              AppSpacing.xxl,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: AppColors.brandYellow,
-                        borderRadius: AppRadius.small,
-                      ),
-                      child: Text(
-                        'AUTOSENSE PRO',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppColors.onBrandYellow,
-                          fontWeight: FontWeight.w700,
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) => SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.xxl,
+                AppSpacing.sm,
+                AppSpacing.xxl,
+                MediaQuery.of(sheetContext).viewInsets.bottom + AppSpacing.xxl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: const BoxDecoration(
+                          color: AppColors.brandYellow,
+                          borderRadius: AppRadius.small,
+                        ),
+                        child: Text(
+                          'AUTOSENSE PRO',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: AppColors.onBrandYellow,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        '3-Day Free Trial',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: AppColors.brandInk,
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          '3-Day Free Trial • EGP 99/mo or EGP 999/yr',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: AppColors.brandInk,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Unlock $featureName',
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Basic DTC lookup and the HP & torque calculator are always free. '
-                  'Subscribe to AutoSense Pro to unlock Live OBD-II Bluetooth/Wi-Fi scanning, '
-                  'Clear Check-Engine Codes, 10-Second Dyno Power Runs, and Full AI Guidance.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    ],
                   ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                PrimaryActionButton(
-                  icon: Icons.workspace_premium_outlined,
-                  label:
-                      'Unlock Annual • 3 days free, then EGP 999/yr (Save 16%)',
-                  onPressed: () {
-                    controller.activateDemoTrial('annual');
-                    Navigator.of(sheetContext).pop();
-                    onUnlocked();
-                  },
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                SecondaryActionButton(
-                  icon: Icons.calendar_month_outlined,
-                  label: 'Unlock Monthly • 3 days free, then EGP 99/mo',
-                  onPressed: () {
-                    controller.activateDemoTrial('monthly');
-                    Navigator.of(sheetContext).pop();
-                    onUnlocked();
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Center(
-                  child: TextButton(
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Unlock $featureName',
+                    style: theme.textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Basic DTC lookup and the HP & torque calculator are always free. '
+                    'Start your 3-day free trial or enter a Pro Activation Code (InstaPay / '
+                    'Vodafone Cash via ${SubscriptionController.supportEmail}) to unlock all Pro tools.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  PrimaryActionButton(
+                    icon: Icons.workspace_premium_outlined,
+                    label:
+                        'Unlock Annual • 3 days free, then EGP 999/yr (Save 16%)',
                     onPressed: () {
+                      controller.activateDemoTrial('annual');
                       Navigator.of(sheetContext).pop();
-                      AppRouter.push<void>(
-                        context,
-                        AppRoutes.subscription,
-                        SubscriptionScreen(controller: controller),
-                      );
+                      onUnlocked();
                     },
-                    child: const Text('Compare Free vs. Pro plans'),
                   ),
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.sm),
+                  SecondaryActionButton(
+                    icon: Icons.calendar_month_outlined,
+                    label: 'Unlock Monthly • 3 days free, then EGP 99/mo',
+                    onPressed: () {
+                      controller.activateDemoTrial('monthly');
+                      Navigator.of(sheetContext).pop();
+                      onUnlocked();
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  TextField(
+                    controller: codeController,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: InputDecoration(
+                      labelText: 'Have a Pro Activation Code?',
+                      hintText: 'e.g. ASPRO-Y-2026',
+                      errorText: errorText,
+                      suffixIcon: IconButton(
+                        tooltip: 'Activate Pro Code',
+                        icon: const Icon(Icons.vpn_key_outlined),
+                        onPressed: () {
+                          final ok = controller
+                              .activateLicenseCode(codeController.text);
+                          if (ok) {
+                            Navigator.of(sheetContext).pop();
+                            onUnlocked();
+                          } else {
+                            setSheetState(() {
+                              errorText = 'Invalid code. Check and try again.';
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        AppRouter.push<void>(
+                          context,
+                          AppRoutes.subscription,
+                          SubscriptionScreen(controller: controller),
+                        );
+                      },
+                      child: const Text(
+                          'Compare Free vs. Pro plans & Direct Payment'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -134,9 +166,52 @@ class SubscriptionScreen extends StatelessWidget {
     );
   }
 
+  @override
+  State<SubscriptionScreen> createState() => _SubscriptionScreenState();
+}
+
+class _SubscriptionScreenState extends State<SubscriptionScreen> {
+  final _codeInput = TextEditingController();
+
+  SubscriptionController get controller => widget.controller;
+
+  @override
+  void dispose() {
+    _codeInput.dispose();
+    super.dispose();
+  }
+
   Future<void> _manage() async {
     await Clipboard.setData(
         const ClipboardData(text: AppConfig.manageSubscriptionUrl));
+  }
+
+  Future<void> _copyPaymentContact() async {
+    await Clipboard.setData(
+        const ClipboardData(text: SubscriptionController.supportEmail));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Support & payment email (youssefahmed4010@gmail.com) copied to clipboard.'),
+        ),
+      );
+    }
+  }
+
+  void _redeemCode() {
+    final ok = controller.activateLicenseCode(_codeInput.text);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'AutoSense Pro Activated! All Pro tools are now unlocked.'
+                : 'Invalid Pro Activation Code. Contact ${SubscriptionController.supportEmail} for assistance.',
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -163,12 +238,14 @@ class SubscriptionScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             if (!SubscriptionController.enabled) ...[
               StatusBanner(
-                controller.demoTrialActive
-                    ? 'AUTOSENSE PRO ACTIVE (${controller.activePlan?.toUpperCase()}) • 3-day trial unlocked (Google Play checkout is disabled in this development build)'
-                    : controller.freemiumGateLocked
-                        ? 'FREE TIER ACTIVE (EGP 0) • Pro features are locked behind the paywall (Google Play checkout is disabled in this development build)'
-                        : 'AUTOSENSE PRO PLANS • 3-day free trial, then EGP 99/mo or EGP 999/yr (Google Play checkout is disabled in this development build)',
-                tone: controller.demoTrialActive
+                controller.licenseCodeActive
+                    ? 'AUTOSENSE PRO ACTIVATED (${controller.activePlan?.toUpperCase()} • Code: ${controller.activatedCode}) • Full Pro access unlocked'
+                    : controller.demoTrialActive
+                        ? 'AUTOSENSE PRO ACTIVE (${controller.activePlan?.toUpperCase()}) • 3-day trial unlocked (Google Play checkout is disabled in this development build)'
+                        : controller.freemiumGateLocked
+                            ? 'FREE TIER ACTIVE (EGP 0) • Pro features are locked behind the paywall (Google Play checkout is disabled in this development build)'
+                            : 'AUTOSENSE PRO PLANS • 3-day free trial, then EGP 99/mo or EGP 999/yr (Google Play checkout is disabled in this development build)',
+                tone: controller.hasProAccess
                     ? BannerTone.info
                     : BannerTone.warning,
               ),
@@ -286,6 +363,50 @@ class SubscriptionScreen extends StatelessWidget {
                         onPressed: controller.activePlan == 'annual'
                             ? null
                             : () => controller.activateDemoTrial('annual'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Direct Pro Activation Code (InstaPay / Vodafone Cash)',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '1. Pay EGP 99 (Monthly) or EGP 999 (Annual) via InstaPay / Vodafone Cash / Payment Link '
+                        'by contacting ${SubscriptionController.supportEmail}.\n'
+                        '2. Enter your Pro Activation Code below to unlock AutoSense Pro immediately on this device.',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      TextField(
+                        controller: _codeInput,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: const InputDecoration(
+                          labelText: 'Pro Activation Code',
+                          hintText: 'e.g. ASPRO-Y-2026',
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      PrimaryActionButton(
+                        icon: Icons.vpn_key_outlined,
+                        label: 'Activate Pro Code',
+                        onPressed: _redeemCode,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      SecondaryActionButton(
+                        icon: Icons.copy_outlined,
+                        label:
+                            'Copy payment contact (${SubscriptionController.supportEmail})',
+                        onPressed: _copyPaymentContact,
                       ),
                     ],
                   ),

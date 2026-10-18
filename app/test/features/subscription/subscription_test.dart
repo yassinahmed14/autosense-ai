@@ -67,6 +67,31 @@ void main() {
     expect(SubscriptionOffer.fromProduct(product(plan: 'weekly')), isNull);
     expect(SubscriptionOffer.fromProduct(product(price: 0)), isNull);
   });
+  test(
+      'Direct Pro Activation Code verifies master & customer codes and rejects invalid codes',
+      () {
+    final controller =
+        SubscriptionController('https://autosense-api.vercel.app');
+    addTearDown(controller.dispose);
+    expect(controller.freemiumGateLocked, isTrue);
+
+    expect(controller.activateLicenseCode('WRONG-CODE-123'), isFalse);
+    expect(controller.freemiumGateLocked, isTrue);
+
+    final customerMonthly =
+        SubscriptionController.generateCustomerCode('monthly', 'CUST101');
+    expect(controller.activateLicenseCode(customerMonthly), isTrue);
+    expect(controller.licenseCodeActive, isTrue);
+    expect(controller.activePlan, 'monthly');
+    expect(controller.freemiumGateLocked, isFalse);
+
+    controller.switchToFreeTier();
+    expect(controller.freemiumGateLocked, isTrue);
+
+    expect(controller.activateLicenseCode('ASPRO-Y-2026'), isTrue);
+    expect(controller.activePlan, 'annual');
+    expect(controller.freemiumGateLocked, isFalse);
+  });
   testWidgets('preview cannot start checkout and keeps support accessible',
       (tester) async {
     final controller = SubscriptionController('http://localhost');
@@ -76,7 +101,8 @@ void main() {
     expect(find.textContaining('checkout is disabled'), findsOneWidget);
     expect(find.text('Start 3-day trial'), findsNothing);
     expect(controller.active, isFalse);
-    await tester.scrollUntilVisible(find.text('Privacy & support'), 250);
+    await tester.scrollUntilVisible(find.text('Privacy & support'), 250,
+        scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Privacy & support'));
     await tester.pumpAndSettle();
     expect(find.byType(PrivacyScreen), findsOneWidget);
