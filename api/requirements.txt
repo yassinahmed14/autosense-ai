@@ -1,0 +1,4 @@
+# Runtime dependencies only (used by Vercel). Billing extras are intentionally excluded.
+fastapi==0.143.0
+pydantic==2.14.1
+pydantic-settings==2.15.0

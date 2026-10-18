@@ -14,9 +14,11 @@ $env:ANDROID_HOME = $androidSdk
 $env:ANDROID_SDK_ROOT = $androidSdk
 $env:GRADLE_USER_HOME = Join-Path $buildRoot 'gradle'
 $env:ANDROID_AVD_HOME = Join-Path $devRoot 'avd'
+$env:PUB_CACHE = Join-Path $devRoot 'pub-cache'
+$env:npm_config_cache = Join-Path $devRoot 'npm-cache'
 $env:TEMP = Join-Path $buildRoot 'temp'
 $env:TMP = $env:TEMP
-foreach ($dir in $env:GRADLE_USER_HOME, $env:ANDROID_AVD_HOME, $env:TEMP) {
+foreach ($dir in $env:GRADLE_USER_HOME, $env:ANDROID_AVD_HOME, $env:PUB_CACHE, $env:npm_config_cache, $env:TEMP) {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
 }
 

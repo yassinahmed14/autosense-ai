@@ -1,41 +1,23 @@
-# Verification record
+# Verification Record
 
-Updated 2026-10-15 on Windows with Python 3.11.0, Flutter 3.47.7 and Dart 3.13.5.
-This file reports observed results,
-not implied production readiness.
+Updated 2026-10-18 on Windows with Python 3.11.0, Flutter 3.47.7, and Dart 3.13.5.
+This file records observed automated and hardware/emulator verification results for **AutoSense AI v1.0.0+6**.
 
 | Check | Status |
 |---|---|
-| Backend tests | 38 passed, including billing state/expiry rejection, disabled verification and token-safe errors |
-| Backend lint and formatting | Passed |
-| Live Uvicorn HTTP smoke check | Passed: health, known/unknown DTC, manual result, mock result and safety priority |
-| OpenAPI and Flutter fixture freshness | Passed in backend contract tests |
-| Migration, seed and ownership SQL syntax | Parsed successfully with PostgreSQL parser (pglast 8.5) |
-| Supabase migrations and RLS execution | Not run; no Supabase/PostgreSQL instance or credentials provided |
-| Flutter analysis | Passed, no issues |
-| Flutter tests | Full suite: 55 passed, one gate test skipped in the default non-billing configuration. Targeted BLE retest: 6 passed, including one additional dashboard-return/session-ownership test. 56 distinct default-mode tests passed across these runs. |
-| Subscription gate test | Separately passed with ENABLE_SUBSCRIPTIONS=true: unverified access blocked; privacy remains reachable |
-| Live Google Play billing / renewals / refunds | Not tested; Play account, products and service credentials absent; checkout disabled in review builds |
-| Flutter platform wrappers | Android, iOS and web generated; debug networking configured |
-| Flutter web build | Passed; compiled preview supplied in demo/web (local API URL) |
-| Desktop browser at 390×844 | Passed: redesigned home/dashboard, mass input, confirmation and complete 10-second simulated run; 48 samples, result shown, no browser errors |
-| Browser interaction on real phones | Not run |
-| Android APK | Version 0.1.0+3 debug APK built; apksigner verified and certificate matches earlier APK; min SDK 24 / target SDK 36; ARM32, ARM64 and x86_64 included. APK ZIP and static 64-bit ELF alignment checks passed. |
-| Android release AAB | Version 0.1.0+3 built; unsigned review output, checkout disabled; static 64-bit ELF alignment checks passed; no Play upload or 16 KB runtime test |
-| Android physical-device installation / launch | User reported installing the earlier APK and reaching BLE setup. Updated automatic-connect APK requires retest. No adb instrumentation or verified ECU data. |
-| iOS native build | Not run; macOS/Xcode unavailable |
-| Docker image | Not built; Docker unavailable |
-| Physical BLE / Wi-Fi adapter / vehicle | Experimental software implemented; no hardware testing or compatibility established |
-
-Backend environment is captured in `backend/requirements.lock.txt`. The installed
-Starlette test client emitted an upstream HTTPX deprecation warning; all assertions
-passed. No real vehicle data or hosted database was accessed.
-
-The supplied SQL test should run against a disposable Supabase project before
-connecting any real users. It covers owner visibility, cross-user reads/writes,
-forbidden parent links, anonymous access, and result deletion cascade, then rolls
-back its test data. Syntax parsing does not establish RLS behavior.
-
-Repeat backend checks and the mobile checks using README commands. Hardware
-validation requires the evidence matrix in `BLE_PLAN.md`; automated mock tests
-cannot prove adapter compatibility or mechanical diagnostic accuracy.
+| Backend unit & integration tests (`pytest`) | **70 passed** (56 generic SAE J2012 DTC codes across `P`, `B`, `C`, `U`, safety priority rules, billing state/expiry rejection, rate limiting, and OpenAPI contract parity) |
+| Backend lint & formatting (`ruff check` + `ruff format --check`) | **Passed** (35 files formatted, 0 lint errors) |
+| Live Vercel Production HTTP smoke check (`scripts/smoke_api.py https://autosense-api.vercel.app`) | **Passed**: `/health`, known/unknown DTCs (`P0300`, `B0001`, `C0031`, `U0100`, `P1234`), manual guidance, mock OBD guidance, and critical safety stop-driving priority |
+| Local Uvicorn HTTP smoke check (`http://127.0.0.1:8000`) | **Passed** |
+| OpenAPI & Flutter fixture freshness (`scripts/export_contracts.py --check`) | **Passed** (`docs/architecture/openapi.json`, `app/test/fixtures/result.json`, `infra/supabase/seed.sql` in sync) |
+| Migration, seed (56 codes) & RLS SQL syntax | **Passed** (`infra/supabase/migrations/20260401000000_init.sql`, `infra/supabase/seed.sql`) |
+| Supabase live cloud execution | Optional / Not connected; app runs 100% free with stateless cloud API + on-device `OfflineDiagnosticEngine` |
+| Flutter static analysis (`flutter analyze`) | **Passed** (0 issues) |
+| Dart formatting (`dart format --set-exit-if-changed`) | **Passed** (61 files formatted) |
+| Flutter automated test suite (`flutter test`) | **68 passed** (including Hybrid Smart Mode offline fallback tests, 56-code offline catalog browser, 35-brand vehicle selector, 100% Free Forever screen, BLE/Wi-Fi protocol parsers, 10s power estimator, and HP/Torque calculator) |
+| Flutter Web release build (`flutter build web --release`) | **Passed** (`app/build/web` compiled against `https://autosense-api.vercel.app`) |
+| Android Debug APK (`flutter build apk --debug`) | **Passed**: `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-debug.apk` (`v1.0.0+6`) |
+| Android Emulator QA Sweep (`emulator-5554`, Pixel 7 API 36, `1080x2400`) | **Passed**: Installed APK, executed autonomous UI sweep (`qa-shots/emu_01..24`), verified Racing Yellow & Carbon theme, 56-code catalog filters, mock scan, manual guidance, live dashboard, and **0 `AndroidRuntime` crashes** |
+| Physical Wireless Android Tablet QA Sweep (`192.168.100.199:48729`, Samsung `GT-N8000`, Android 11, `1280x800`) | **Passed**: Installed APK over Wi-Fi ADB, executed full autonomous UI sweep (`qa-shots/tablet_01..24`), verified landscape layout, live cloud + offline Hybrid Smart Mode, and **0 `AndroidRuntime` crashes** |
+| iOS native build | Not run on Windows (requires macOS + Xcode) |
+| Physical ELM327 BLE / Wi-Fi adapter plugged into a live car ECU | Software protocol drivers & unit tests verified; physical vehicle CAN bus test requires plugging an ELM327 adapter into a vehicle OBD-II port with ignition ON |

@@ -3,7 +3,7 @@
   "info": {
     "title": "AutoSense AI Starter",
     "description": "Local rule-based guidance. No authentication or persistence yet.",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "paths": {
     "/v1/billing/config": {

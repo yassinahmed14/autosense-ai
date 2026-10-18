@@ -1,7 +1,7 @@
 name: autosense_ai
-description: AutoSense AI manual and simulated OBD diagnostic guidance starter.
+description: AutoSense AI — automotive OBD-II diagnostic guidance, live telemetry dashboard, and performance estimator.
 publish_to: none
-version: 0.1.0+5
+version: 1.0.0+6
 environment:
   sdk: '>=3.6.0 <4.0.0'
 dependencies:
@@ -19,3 +19,22 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/hero_car.png
+    - assets/fonts/OFL-Inter.txt
+    - assets/fonts/OFL-Saira.txt
+  fonts:
+    - family: Saira
+      fonts:
+        - asset: assets/fonts/Saira-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Saira-Bold.ttf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600

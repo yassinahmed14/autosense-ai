@@ -4,8 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "autosense-api"
-version = "0.1.0"
-description = "AutoSense diagnostic guidance starter; deterministic rules, no definitive diagnoses"
+version = "1.0.0"
+description = "AutoSense diagnostic guidance API; deterministic rules, no definitive diagnoses"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.30,<1", "pydantic-settings>=2.6,<3"]
 
@@ -14,11 +15,21 @@ billing = ["google-auth[requests]>=2.40,<3"]
 dev = ["pytest>=8,<10", "httpx>=0.27,<1", "ruff>=0.9,<1"]
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+where = ["src"]
+include = ["autosense_api*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "--import-mode=importlib"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "BLE", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["autosense_api"]
