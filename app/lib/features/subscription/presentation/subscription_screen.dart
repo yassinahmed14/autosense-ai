@@ -9,18 +9,31 @@ import 'package:autosense_ai/shared/widgets/page_layout.dart';
 import 'package:autosense_ai/shared/widgets/status_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// AutoSense Pro membership & Freemium plan selector screen.
 ///
 /// Displays Monthly (`EGP 99.00/month`) and Annual (`EGP 999.00/year`) plans
-/// with a 3-day free trial, Direct Pro Activation Code redemption (InstaPay /
-/// Vodafone Cash / Direct), Freemium vs. Pro comparison, and Google Play billing.
+/// with a 3-day free trial, Automated InstaPay Screenshot Proof verification
+/// (`youssefabdelrehim2004@instapay`), Direct Pro Activation Code redemption,
+/// Freemium vs. Pro comparison, and Google Play billing.
 class SubscriptionScreen extends StatefulWidget {
   /// Creates the membership screen bound to [controller].
-  const SubscriptionScreen({super.key, required this.controller});
+  const SubscriptionScreen({
+    super.key,
+    required this.controller,
+    this.initialScreenshotBytes,
+    this.initialScreenshotName,
+  });
 
   /// Billing state and actions.
   final SubscriptionController controller;
+
+  /// Optional pre-populated screenshot bytes (used in widget tests).
+  final Uint8List? initialScreenshotBytes;
+
+  /// Optional pre-populated screenshot file name (used in widget tests).
+  final String? initialScreenshotName;
 
   /// Shows the Freemium Pro paywall bottom sheet when a locked Pro feature is tapped.
   static Future<void> showProPaywallSheet(
@@ -89,8 +102,8 @@ class SubscriptionScreen extends StatefulWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Basic DTC lookup and the HP & torque calculator are always free. '
-                    'Start your 3-day free trial or enter a Pro Activation Code (InstaPay / '
-                    'Vodafone Cash via ${SubscriptionController.supportEmail}) to unlock all Pro tools.',
+                    'Start your 3-day free trial, pay via InstaPay (${SubscriptionController.instaPayAddress}) '
+                    'and upload your screenshot proof for an automatic Promo Code, or enter a code below.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -154,7 +167,7 @@ class SubscriptionScreen extends StatefulWidget {
                         );
                       },
                       child: const Text(
-                          'Compare Free vs. Pro plans & Direct Payment'),
+                          'Pay via InstaPay & Upload Screenshot Proof'),
                     ),
                   ),
                 ],
@@ -172,12 +185,25 @@ class SubscriptionScreen extends StatefulWidget {
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
   final _codeInput = TextEditingController();
+  final _refInput = TextEditingController();
+  final _picker = ImagePicker();
+  String _selectedInstaPayPlan = 'annual';
+  Uint8List? _screenshotBytes;
+  String? _screenshotName;
 
   SubscriptionController get controller => widget.controller;
 
   @override
+  void initState() {
+    super.initState();
+    _screenshotBytes = widget.initialScreenshotBytes;
+    _screenshotName = widget.initialScreenshotName;
+  }
+
+  @override
   void dispose() {
     _codeInput.dispose();
+    _refInput.dispose();
     super.dispose();
   }
 
@@ -186,15 +212,70 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         const ClipboardData(text: AppConfig.manageSubscriptionUrl));
   }
 
-  Future<void> _copyPaymentContact() async {
-    await Clipboard.setData(
-        const ClipboardData(text: SubscriptionController.supportEmail));
+  Future<void> _copyText(String text, String label) async {
+    await Clipboard.setData(ClipboardData(text: text));
     if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$label copied to clipboard.')),
+      );
+    }
+  }
+
+  Future<void> _pickScreenshot() async {
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        imageQuality: 90,
+      );
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _screenshotBytes = bytes;
+        _screenshotName = picked.name;
+      });
+    } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-              'Support & payment email (youssefahmed4010@gmail.com) copied to clipboard.'),
+              'Could not open gallery. Ensure photo permissions are allowed.'),
         ),
+      );
+    }
+  }
+
+  void _verifyScreenshotAndIssueCode() {
+    if (_screenshotBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Please upload your InstaPay transaction screenshot image first.'),
+        ),
+      );
+      return;
+    }
+    final issuedCode = controller.verifyInstaPayProof(
+      plan: _selectedInstaPayPlan,
+      referenceNumber: _refInput.text,
+      screenshotBytes: _screenshotBytes!,
+      fileName: _screenshotName ?? 'instapay_receipt.png',
+    );
+    if (issuedCode != null) {
+      _codeInput.text = issuedCode;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Screenshot verified! Promo Code $issuedCode issued & AutoSense Pro unlocked!',
+            ),
+          ),
+        );
+      }
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(controller.message)),
       );
     }
   }
@@ -374,19 +455,170 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Direct Pro Activation Code (InstaPay / Vodafone Cash)',
-                        style: theme.textTheme.titleMedium,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Automated InstaPay Upgrade & Instant Promo Code',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: AppColors.brandYellow,
+                              borderRadius: AppRadius.small,
+                            ),
+                            child: Text(
+                              'INSTANT AUTO-VERIFY',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: AppColors.onBrandYellow,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        '1. Pay EGP 99 (Monthly) or EGP 999 (Annual) via InstaPay / Vodafone Cash / Payment Link '
-                        'by contacting ${SubscriptionController.supportEmail}.\n'
-                        '2. Enter your Pro Activation Code below to unlock AutoSense Pro immediately on this device.',
+                        'Step 1: Send EGP 99 (Monthly) or EGP 999 (Annual) via InstaPay to:\n'
+                        '• InstaPay Address: ${SubscriptionController.instaPayAddress}\n'
+                        '• InstaPay Link: ${SubscriptionController.instaPayUrl}\n'
+                        'Step 2: Select your plan, upload your InstaPay screenshot proof, and enter '
+                        'the InstaPay Reference Number to automatically receive your Promo Code & unlock Pro!',
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: AppColors.textSecondary),
                       ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SecondaryActionButton(
+                        icon: Icons.link_rounded,
+                        label:
+                            'Copy InstaPay Payment Link (ipn.eg/S/youssefabdelrehim2004)',
+                        onPressed: () => _copyText(
+                          SubscriptionController.instaPayUrl,
+                          'InstaPay payment link',
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      SecondaryActionButton(
+                        icon: Icons.account_balance_wallet_outlined,
+                        label:
+                            'Copy InstaPay Address (${SubscriptionController.instaPayAddress})',
+                        onPressed: () => _copyText(
+                          SubscriptionController.instaPayAddress,
+                          'InstaPay address (${SubscriptionController.instaPayAddress})',
+                        ),
+                      ),
                       const SizedBox(height: AppSpacing.md),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Annual • EGP 999 (Best Value)'),
+                            selected: _selectedInstaPayPlan == 'annual',
+                            onSelected: (_) => setState(
+                                () => _selectedInstaPayPlan = 'annual'),
+                          ),
+                          ChoiceChip(
+                            label: const Text('Monthly • EGP 99'),
+                            selected: _selectedInstaPayPlan == 'monthly',
+                            onSelected: (_) => setState(
+                                () => _selectedInstaPayPlan = 'monthly'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextField(
+                        controller: _refInput,
+                        decoration: const InputDecoration(
+                          labelText: 'InstaPay Reference Number',
+                          hintText: 'e.g. 429103847561',
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SecondaryActionButton(
+                        icon: _screenshotBytes != null
+                            ? Icons.check_circle_outline
+                            : Icons.upload_file_outlined,
+                        label: _screenshotName != null
+                            ? 'Screenshot attached: $_screenshotName'
+                            : 'Upload InstaPay Screenshot Proof',
+                        onPressed: _pickScreenshot,
+                      ),
+                      if (_screenshotBytes != null) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        ClipRRect(
+                          borderRadius: AppRadius.medium,
+                          child: SizedBox(
+                            height: 110,
+                            width: double.infinity,
+                            child: Image.memory(
+                              _screenshotBytes!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Center(
+                                child: Text('Screenshot image loaded'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.sm),
+                      PrimaryActionButton(
+                        icon: Icons.verified_outlined,
+                        label: 'Verify Screenshot & Get Instant Pro Code',
+                        onPressed: _verifyScreenshotAndIssueCode,
+                      ),
+                      if (controller.lastIssuedPromoCode != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryContainer,
+                            borderRadius: AppRadius.medium,
+                            border: Border.all(color: AppColors.brandYellow),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'YOUR ISSUED PRO PROMO CODE:',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: AppColors.brandInk,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              SelectableText(
+                                controller.lastIssuedPromoCode!,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              SecondaryActionButton(
+                                icon: Icons.copy_outlined,
+                                label:
+                                    'Copy Promo Code (${controller.lastIssuedPromoCode})',
+                                onPressed: () => _copyText(
+                                  controller.lastIssuedPromoCode!,
+                                  'Promo Code ${controller.lastIssuedPromoCode}',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const Divider(height: AppSpacing.xl),
+                      Text(
+                        'Already have a Pro Activation Code?',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
                       TextField(
                         controller: _codeInput,
                         textCapitalization: TextCapitalization.characters,
@@ -396,17 +628,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      PrimaryActionButton(
+                      SecondaryActionButton(
                         icon: Icons.vpn_key_outlined,
                         label: 'Activate Pro Code',
                         onPressed: _redeemCode,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      SecondaryActionButton(
-                        icon: Icons.copy_outlined,
-                        label:
-                            'Copy payment contact (${SubscriptionController.supportEmail})',
-                        onPressed: _copyPaymentContact,
                       ),
                     ],
                   ),

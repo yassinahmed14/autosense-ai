@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:autosense_ai/core/network/api_client.dart';
 import 'package:autosense_ai/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:autosense_ai/features/diagnostics/presentation/lookup_screen.dart';
@@ -48,6 +50,12 @@ GooglePlayProductDetails product(
   )).single;
 }
 
+final _validPngBytes = Uint8List.fromList([
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+]);
+
 void main() {
   test('trial label includes actual recurring price, not free phase price', () {
     final offer = SubscriptionOffer.fromProduct(product(trial: true))!;
@@ -68,29 +76,66 @@ void main() {
     expect(SubscriptionOffer.fromProduct(product(price: 0)), isNull);
   });
   test(
-      'Direct Pro Activation Code verifies master & customer codes and rejects invalid codes',
+      'Direct Pro Activation Code & Automated InstaPay Screenshot verification issue promo code and unlock Pro',
       () {
     final controller =
         SubscriptionController('https://autosense-api.vercel.app');
     addTearDown(controller.dispose);
     expect(controller.freemiumGateLocked, isTrue);
+    expect(
+      SubscriptionController.instaPayUrl,
+      'https://ipn.eg/S/youssefabdelrehim2004/instapay/5i0M8U',
+    );
+    expect(
+      SubscriptionController.instaPayAddress,
+      'youssefabdelrehim2004@instapay',
+    );
 
-    expect(controller.activateLicenseCode('WRONG-CODE-123'), isFalse);
+    // 1. Invalid image bytes rejected.
+    expect(
+      controller.verifyInstaPayProof(
+        plan: 'annual',
+        referenceNumber: '429103847561',
+        screenshotBytes: Uint8List.fromList([1, 2, 3]),
+      ),
+      isNull,
+    );
     expect(controller.freemiumGateLocked, isTrue);
 
-    final customerMonthly =
-        SubscriptionController.generateCustomerCode('monthly', 'CUST101');
-    expect(controller.activateLicenseCode(customerMonthly), isTrue);
+    // 2. Short reference number rejected.
+    expect(
+      controller.verifyInstaPayProof(
+        plan: 'annual',
+        referenceNumber: '123',
+        screenshotBytes: _validPngBytes,
+      ),
+      isNull,
+    );
+    expect(controller.freemiumGateLocked, isTrue);
+
+    // 3. Valid PNG screenshot + 12-digit InstaPay reference issues Promo Code & unlocks Pro!
+    final issued = controller.verifyInstaPayProof(
+      plan: 'annual',
+      referenceNumber: '429103847561',
+      screenshotBytes: _validPngBytes,
+      fileName: 'instapay_999.png',
+    );
+    expect(issued, isNotNull);
+    expect(issued, startsWith('ASPRO-Y-429103847561-'));
+    expect(controller.lastIssuedPromoCode, issued);
     expect(controller.licenseCodeActive, isTrue);
-    expect(controller.activePlan, 'monthly');
-    expect(controller.freemiumGateLocked, isFalse);
-
-    controller.switchToFreeTier();
-    expect(controller.freemiumGateLocked, isTrue);
-
-    expect(controller.activateLicenseCode('ASPRO-Y-2026'), isTrue);
     expect(controller.activePlan, 'annual');
     expect(controller.freemiumGateLocked, isFalse);
+
+    // 4. Reusing the exact same InstaPay reference number is rejected.
+    expect(
+      controller.verifyInstaPayProof(
+        plan: 'annual',
+        referenceNumber: '429103847561',
+        screenshotBytes: _validPngBytes,
+      ),
+      isNull,
+    );
   });
   testWidgets('preview cannot start checkout and keeps support accessible',
       (tester) async {
@@ -103,6 +148,8 @@ void main() {
     expect(controller.active, isFalse);
     await tester.scrollUntilVisible(find.text('Privacy & support'), 250,
         scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(find.text('Privacy & support'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Privacy & support'));
     await tester.pumpAndSettle();
     expect(find.byType(PrivacyScreen), findsOneWidget);

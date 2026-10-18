@@ -48,4 +48,11 @@ abstract final class AppConfig {
   static const manageSubscriptionUrl =
       'https://play.google.com/store/account/subscriptions'
       '?sku=autosense_pro&package=com.autosense.autosense_ai';
+
+  /// Official InstaPay payment link for direct Pro subscriptions.
+  static const instaPayUrl =
+      'https://ipn.eg/S/youssefabdelrehim2004/instapay/5i0M8U';
+
+  /// Official InstaPay Payment Address (IPA) for direct Pro subscriptions.
+  static const instaPayAddress = 'youssefabdelrehim2004@instapay';
 }

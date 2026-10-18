@@ -10,8 +10,8 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 export 'package:autosense_ai/features/subscription/domain/subscription_offer_model.dart';
 
-/// Owns Google Play billing state, Direct Pro Activation Code verification, and
-/// Freemium / 3-day free trial controls.
+/// Owns Google Play billing state, Automated InstaPay Screenshot Proof
+/// verification, Direct Pro Activation Code redemption, and Freemium controls.
 class SubscriptionController extends ChangeNotifier {
   SubscriptionController(this.apiBaseUrl, {bool? startLocked})
       : _freemiumGateLocked = startLocked ?? apiBaseUrl.startsWith('https://');
@@ -22,6 +22,8 @@ class SubscriptionController extends ChangeNotifier {
   static const policyUrl = AppConfig.privacyPolicyUrl;
   static const termsUrl = AppConfig.termsUrl;
   static const supportEmail = AppConfig.supportEmail;
+  static const instaPayUrl = AppConfig.instaPayUrl;
+  static const instaPayAddress = AppConfig.instaPayAddress;
 
   /// Reference pricing for the Monthly base plan.
   static const monthlyPriceLabel = 'EGP 99.00/month (~\$2.99/mo)';
@@ -41,10 +43,12 @@ class SubscriptionController extends ChangeNotifier {
   String? _token;
   String? _demoPlan;
   String? _activatedCode;
+  String? _lastIssuedPromoCode;
+  final Set<String> _usedReferences = <String>{};
   bool _freemiumGateLocked;
   bool ready = false, busy = false, _closed = false;
   String message =
-      'Freemium mode: Basic DTC lookup & HP calculator are free. Start your 3-day free trial or enter a Pro Activation Code (EGP 99/month or EGP 999/year) for full access.';
+      'Freemium mode: Basic DTC lookup & HP calculator are free. Pay via InstaPay ($instaPayAddress), upload your screenshot proof to receive an instant Pro Promo Code, or start a 3-day free trial.';
   List<SubscriptionOffer> offers = [];
 
   /// True only when a real Google Play store purchase has been server-verified.
@@ -55,6 +59,9 @@ class SubscriptionController extends ChangeNotifier {
 
   /// The verified Pro Activation Code, if any.
   String? get activatedCode => _activatedCode;
+
+  /// Most recent Promo Code automatically issued after InstaPay screenshot verification.
+  String? get lastIssuedPromoCode => _lastIssuedPromoCode;
 
   /// True when the interactive 3-day Pro trial or a Direct Pro Activation Code is active.
   bool get demoTrialActive => _demoPlan != null;
@@ -98,6 +105,68 @@ class SubscriptionController extends ChangeNotifier {
     final idPart = cleanId.isEmpty ? '1001' : cleanId;
     final check = computeCodeChecksum(planChar, idPart);
     return 'ASPRO-$planChar-$idPart-$check';
+  }
+
+  /// Checks whether [bytes] starts with valid PNG, JPEG, or WEBP image headers.
+  static bool isValidScreenshotBytes(Uint8List bytes) {
+    if (bytes.length < 16) return false;
+    final isPng = bytes[0] == 0x89 &&
+        bytes[1] == 0x50 &&
+        bytes[2] == 0x4E &&
+        bytes[3] == 0x47;
+    final isJpeg = bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
+    final isWebp = bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46;
+    return isPng || isJpeg || isWebp;
+  }
+
+  /// Automatically verifies an uploaded InstaPay screenshot image together with
+  /// the transaction [referenceNumber], issues a unique Promo Code, and
+  /// activates AutoSense Pro immediately.
+  ///
+  /// Returns the generated Promo Code on success, or `null` if verification fails.
+  String? verifyInstaPayProof({
+    required String plan,
+    required String referenceNumber,
+    required Uint8List screenshotBytes,
+    String fileName = 'instapay_receipt.png',
+  }) {
+    if (!isValidScreenshotBytes(screenshotBytes)) {
+      message =
+          'Please upload a valid InstaPay transaction screenshot image (PNG or JPG).';
+      _changed();
+      return null;
+    }
+
+    final cleanRef = referenceNumber
+        .trim()
+        .toUpperCase()
+        .replaceAll(RegExp('[^A-Z0-9]'), '');
+    if (cleanRef.length < 6) {
+      message =
+          'Please enter the valid InstaPay Reference Number shown on your screenshot (at least 6 digits/characters).';
+      _changed();
+      return null;
+    }
+
+    if (_usedReferences.contains(cleanRef)) {
+      message =
+          'This InstaPay Reference Number ($cleanRef) has already been used to issue a Promo Code.';
+      _changed();
+      return null;
+    }
+
+    _usedReferences.add(cleanRef);
+    final issuedCode = generateCustomerCode(plan, cleanRef);
+    _lastIssuedPromoCode = issuedCode;
+    activateLicenseCode(issuedCode);
+    final price = plan == 'annual' ? annualPriceLabel : monthlyPriceLabel;
+    message =
+        'InstaPay screenshot verified ($fileName)! Promo Code $issuedCode issued & AutoSense Pro (${plan.toUpperCase()} • $price) is now unlocked!';
+    _changed();
+    return issuedCode;
   }
 
   /// Verifies and activates a Direct Pro Activation Code (InstaPay / Vodafone Cash / Direct).
