@@ -1,5 +1,6 @@
 import 'package:autosense_ai/core/config/app_config.dart';
 import 'package:autosense_ai/core/routing/app_router.dart';
+import 'package:autosense_ai/core/theme/app_colors.dart';
 import 'package:autosense_ai/core/theme/app_spacing.dart';
 import 'package:autosense_ai/features/privacy/presentation/privacy_screen.dart';
 import 'package:autosense_ai/features/subscription/data/subscription_controller.dart';
@@ -9,17 +10,129 @@ import 'package:autosense_ai/shared/widgets/status_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// 100% Free Edition & Membership overview screen.
+/// AutoSense Pro membership & Freemium plan selector screen.
 ///
-/// Highlights that all Pro diagnostic, offline catalog, and telemetry tools
-/// are unlocked at zero cost in this edition, while retaining Google Play
-/// billing compliance disclosures when `ENABLE_BILLING=true`.
+/// Displays Monthly (`EGP 99.00/month`) and Annual (`EGP 999.00/year`) plans
+/// with a 3-day free trial, Freemium vs. Pro feature comparison, interactive
+/// tablet/demo trial activation, and Google Play billing compliance disclosures.
 class SubscriptionScreen extends StatelessWidget {
   /// Creates the membership screen bound to [controller].
   const SubscriptionScreen({super.key, required this.controller});
 
   /// Billing state and actions.
   final SubscriptionController controller;
+
+  /// Shows the Freemium Pro paywall bottom sheet when a locked Pro feature is tapped.
+  static Future<void> showProPaywallSheet(
+    BuildContext context,
+    SubscriptionController controller, {
+    required String featureName,
+    required VoidCallback onUnlocked,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xxl,
+              AppSpacing.sm,
+              AppSpacing.xxl,
+              AppSpacing.xxl,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: const BoxDecoration(
+                        color: AppColors.brandYellow,
+                        borderRadius: AppRadius.small,
+                      ),
+                      child: Text(
+                        'AUTOSENSE PRO',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: AppColors.onBrandYellow,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        '3-Day Free Trial',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: AppColors.brandInk,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Unlock $featureName',
+                  style: theme.textTheme.headlineSmall,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Basic DTC lookup and the HP & torque calculator are always free. '
+                  'Subscribe to AutoSense Pro to unlock Live OBD-II Bluetooth/Wi-Fi scanning, '
+                  'Clear Check-Engine Codes, 10-Second Dyno Power Runs, and Full AI Guidance.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryActionButton(
+                  icon: Icons.workspace_premium_outlined,
+                  label:
+                      'Unlock Annual • 3 days free, then EGP 999/yr (Save 16%)',
+                  onPressed: () {
+                    controller.activateDemoTrial('annual');
+                    Navigator.of(sheetContext).pop();
+                    onUnlocked();
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                SecondaryActionButton(
+                  icon: Icons.calendar_month_outlined,
+                  label: 'Unlock Monthly • 3 days free, then EGP 99/mo',
+                  onPressed: () {
+                    controller.activateDemoTrial('monthly');
+                    Navigator.of(sheetContext).pop();
+                    onUnlocked();
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      AppRouter.push<void>(
+                        context,
+                        AppRoutes.subscription,
+                        SubscriptionScreen(controller: controller),
+                      );
+                    },
+                    child: const Text('Compare Free vs. Pro plans'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _manage() async {
     await Clipboard.setData(
@@ -42,33 +155,170 @@ class SubscriptionScreen extends StatelessWidget {
                 style: theme.textTheme.headlineMedium),
             const SizedBox(height: AppSpacing.md),
             const Text(
-                '100% Free Edition: All manual diagnostics, 56-code offline & cloud DTC library, '
-                '35-brand vehicle selector, live telemetry dashboard, and 10-second dyno power tools are unlocked at zero cost. '
+                'Freemium & AutoSense Pro: Basic 56-code DTC lookup and the HP & torque '
+                'calculator are always Free (EGP 0). Upgrade to AutoSense Pro (3-day free trial, '
+                'then EGP 99/month or EGP 999/year) to unlock Live OBD-II Bluetooth/Wi-Fi '
+                'telemetry, Clear Codes, 10-Second Dyno Power Estimator, and Full AI Guidance. '
                 'A compatible scanner and supported vehicle are still required for real readings.'),
             const SizedBox(height: AppSpacing.xl),
             if (!SubscriptionController.enabled) ...[
-              const StatusBanner(
-                  '100% FREE EDITION • All Pro tools are unlocked forever; checkout is disabled in this development build',
-                  tone: BannerTone.warning),
-              const Card(
-                child: ListTile(
-                  leading: Icon(Icons.check_circle_outline),
-                  title: Text('Unlocked Free Forever (EGP 0 / \$0)'),
-                  subtitle: Text(
-                      'Offline + Cloud 56-Code P/B/C/U Engine • 35 Car Brands • Live RPM/Speed/Coolant/Throttle • 10s Dyno Power Estimator'),
+              StatusBanner(
+                controller.demoTrialActive
+                    ? 'AUTOSENSE PRO ACTIVE (${controller.activePlan?.toUpperCase()}) • 3-day trial unlocked (Google Play checkout is disabled in this development build)'
+                    : controller.freemiumGateLocked
+                        ? 'FREE TIER ACTIVE (EGP 0) • Pro features are locked behind the paywall (Google Play checkout is disabled in this development build)'
+                        : 'AUTOSENSE PRO PLANS • 3-day free trial, then EGP 99/mo or EGP 999/yr (Google Play checkout is disabled in this development build)',
+                tone: controller.demoTrialActive
+                    ? BannerTone.info
+                    : BannerTone.warning,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text('Monthly',
+                                style: theme.textTheme.titleLarge),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primaryContainer,
+                              borderRadius: AppRadius.small,
+                            ),
+                            child: Text(
+                              '3-DAY FREE TRIAL',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: AppColors.brandInk,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '3-day trial, then EGP 99/month (~\$2.99/mo)',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Full access to Live OBD-II Bluetooth & Wi-Fi Scanner, Clear Codes, '
+                        '10-Second Dyno Power Run, and 35-Brand AI Diagnostic Guidance. Cancel anytime.',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      PrimaryActionButton(
+                        icon: controller.activePlan == 'monthly'
+                            ? Icons.check_circle
+                            : Icons.play_arrow_rounded,
+                        label: controller.activePlan == 'monthly'
+                            ? 'Monthly Pro trial active (EGP 99/mo)'
+                            : 'Activate Monthly 3-day trial (EGP 99/mo)',
+                        onPressed: controller.activePlan == 'monthly'
+                            ? null
+                            : () => controller.activateDemoTrial('monthly'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const Card(
-                child: ListTile(
-                    title: Text('Monthly'),
-                    subtitle: Text(
-                        'Included free in this edition (standard reference: 3-day trial, then EGP 99/month)')),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text('Annual',
+                                style: theme.textTheme.titleLarge),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: AppColors.brandYellow,
+                              borderRadius: AppRadius.small,
+                            ),
+                            child: Text(
+                              'BEST VALUE • SAVE 16%',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: AppColors.onBrandYellow,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '3-day trial, then EGP 999/year (~\$24.99/yr • EGP 83.25/mo)',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Includes 3-day free trial and 2 months free compared to monthly billing. '
+                        'Unlocks every Pro diagnostic, telemetry, and scanner tool for 12 months.',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      PrimaryActionButton(
+                        icon: controller.activePlan == 'annual'
+                            ? Icons.check_circle
+                            : Icons.workspace_premium_outlined,
+                        label: controller.activePlan == 'annual'
+                            ? 'Annual Pro trial active (EGP 999/yr)'
+                            : 'Activate Annual 3-day trial (EGP 999/yr)',
+                        onPressed: controller.activePlan == 'annual'
+                            ? null
+                            : () => controller.activateDemoTrial('annual'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const Card(
-                child: ListTile(
-                    title: Text('Annual'),
-                    subtitle: Text(
-                        'Included free in this edition (standard reference: 3-day trial, then EGP 999/year)')),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Free Tier vs. AutoSense Pro',
+                          style: theme.textTheme.titleMedium),
+                      const SizedBox(height: AppSpacing.xs),
+                      const Text(
+                        '• Always Free (EGP 0): 56-Code DTC Library (P/B/C/U), Offline Catalog Browser & HP/Torque Calculator.\n'
+                        '• AutoSense Pro (EGP 99/mo or EGP 999/yr): Live OBD-II Bluetooth/Wi-Fi Dashboard, Clear Check-Engine Codes, 10s Dyno Power Run & Full 35-Brand AI Diagnostic Guidance.',
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      SecondaryActionButton(
+                        icon: controller.freemiumGateLocked
+                            ? Icons.lock_outline
+                            : Icons.lock_open_outlined,
+                        label: controller.freemiumGateLocked
+                            ? 'Free tier active (Pro paywall locked)'
+                            : 'Switch to Free tier (test Pro paywall lock)',
+                        onPressed: controller.freemiumGateLocked
+                            ? null
+                            : controller.switchToFreeTier,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
             for (final offer in controller.offers)
@@ -137,8 +387,7 @@ class SubscriptionScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-                'Internet access is only required when verifying store subscriptions; '
-                'all diagnostic and calculation features work offline at zero cost.',
+                'Internet access is required to verify Google Play store subscriptions.',
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],

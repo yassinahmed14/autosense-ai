@@ -30,13 +30,13 @@ It gives **preliminary guidance only** — never a definitive diagnosis.
 
 | Item | Status |
 |---|---|
-| App version | **1.0.0+6** (100% Free Forever Edition) |
+| App version | **1.0.0+6** (Freemium + AutoSense Pro: `EGP 99/mo` or `EGP 999/yr` + 3-day trial) |
 | API live URL | **`https://autosense-api.vercel.app`** (live & smoke-tested on Vercel Hobby) |
 | Web build | Built in `app/build/web` pointing to `https://autosense-api.vercel.app` |
 | Android APK | `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-debug.apk` |
 | Emulator QA | **Passed (0 crashes)** on `emulator-5554` (Pixel 7, API 36, `1080x2400`) |
 | Wireless Tablet QA | **Passed (0 crashes)** on `192.168.100.199:48729` (Samsung `GT-N8000`, Android 11, `1280x800`) |
-| Automated Tests | **138 passed** (`70` FastAPI `pytest` + `68` Flutter unit/widget/protocol tests; `0` lint issues) |
+| Automated Tests | **139 passed** (`70` FastAPI `pytest` + `69` Flutter unit/widget/protocol tests; `0` lint issues) |
 | Bluetooth/Wi‑Fi scanner | BLE + Wi-Fi ELM327 drivers & unit tests verified; physical car ECU test requires plugging adapter into a real car |
 
 ## 3. Repository map
@@ -106,10 +106,10 @@ and npm cache live on `D:\CodexWork\…` (handled by `dev_env.ps1`).
 
 - 2026-10-18 — Canonical source = former "Google Play preparation" copy; restructured into `api/`, `app/`, `infra/`, `distribution/`.
 - 2026-10-18 — Light theme **"Racing Yellow & Carbon"** (owner's choice): white/silver base, racing-yellow fills, carbon text, Saira + Inter fonts, custom yellow supercar hero image (`DESIGN.md`).
-- 2026-10-18 — **100% Free Forever Policy (A1):** All Pro features unlocked for free (`$0 / EGP 0`).
 - 2026-10-18 — **Competitor Feature Parity (A2):** Expanded to 56 generic SAE J2012 DTC codes (`P`, `B`, `C`, `U`), interactive offline catalog browser with filter chips, 35 global car brands, and SAE J1979 emissions readiness reference.
 - 2026-10-18 — **Hybrid Smart Mode (A3):** `ApiClient` attempts the cloud API first (4s timeout) and automatically falls back in `<5ms` to on-device `OfflineDiagnosticEngine`.
 - 2026-10-18 — **Live Cloud Deployment (A4):** Deployed FastAPI backend to Vercel Hobby (`https://autosense-api.vercel.app`) and verified on both `emulator-5554` and wireless tablet `GT-N8000`.
+- 2026-10-18 — **Freemium + AutoSense Pro Subscription Fee:** Added **Monthly (`EGP 99/month`, ~$2.99/mo)** and **Annual (`EGP 999/year`, ~$24.99/yr, Save 16%)** plans with a **3-day free trial**. Basic DTC lookup (`56 codes`) and HP calculator are always Free; Pro unlocks Live OBD Scanner, Clear Codes, 10s Dyno Run, and Full AI Guidance, with interactive tablet/demo trial controls plus Google Play Billing support.
 
 ## 9. Working with the owner
 
@@ -124,6 +124,7 @@ recommended option.
 |---|---|
 | **App (frontend)** | What users see and tap on their phone/tablet. Here: Flutter in `app/`. |
 | **API (backend)** | The app's "waiter": the phone asks it a question, it fetches the answer from the server. Here: `api/`. |
+| **Freemium & Paywall** | Giving basic tools for free (like DTC code lookup & HP calculator) so anyone can use the app, while showing an upgrade sheet ("paywall") when someone taps a Pro feature. |
 | **Hybrid Smart Mode (Offline Fallback)** | A backup brain built right inside the app: if your phone has no internet in a garage, the app answers in under 5 milliseconds by itself. |
 | **SAE J2012 (`P`, `B`, `C`, `U` codes)** | The world standard for car trouble codes: **P** = Powertrain (engine/gearbox), **C** = Chassis (ABS/brakes), **B** = Body (airbags), **U** = Network (computer wiring). |
 | **Readiness Monitors (SAE J1979)** | Self-tests your car's computer runs while you drive to prove emissions systems work before a government inspection. |

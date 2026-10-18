@@ -10,7 +10,8 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 export 'package:autosense_ai/features/subscription/domain/subscription_offer_model.dart';
 
-/// Owns Google Play billing state and server-side purchase verification.
+/// Owns Google Play billing state, server-side purchase verification, and
+/// interactive Freemium / Pro trial preview controls for local & tablet testing.
 class SubscriptionController extends ChangeNotifier {
   SubscriptionController(this.apiBaseUrl);
   final String apiBaseUrl;
@@ -18,6 +19,16 @@ class SubscriptionController extends ChangeNotifier {
   static const productId = 'autosense_pro';
   static const policyUrl = AppConfig.privacyPolicyUrl;
   static const termsUrl = AppConfig.termsUrl;
+
+  /// Reference pricing for the Monthly base plan.
+  static const monthlyPriceLabel = 'EGP 99.00/month (~\$2.99/mo)';
+
+  /// Reference pricing for the Annual base plan.
+  static const annualPriceLabel = 'EGP 999.00/year (~\$24.99/yr)';
+
+  /// Standard introductory free-trial length in days.
+  static const trialDays = 3;
+
   final _http = http.Client();
   StreamSubscription<List<PurchaseDetails>>? _updates;
   Timer? _refresh;
@@ -25,12 +36,50 @@ class SubscriptionController extends ChangeNotifier {
   InAppPurchase? _store;
   DateTime? _expires;
   String? _token;
+  String? _demoPlan;
+  bool _freemiumGateLocked = false;
   bool ready = false, busy = false, _closed = false;
-  String message = 'Subscriptions are not activated in this development build.';
+  String message =
+      'Freemium mode: Basic DTC lookup & HP calculator are free. Subscribe to AutoSense Pro (EGP 99/month or EGP 999/year with 3-day free trial) for full access.';
   List<SubscriptionOffer> offers = [];
+
+  /// True only when a real Google Play store purchase has been server-verified.
   bool get active => _expires?.isAfter(DateTime.now().toUtc()) ?? false;
+
+  /// True when the interactive tablet/demo 3-day Pro trial is active.
+  bool get demoTrialActive => _demoPlan != null;
+
+  /// Currently selected demo plan (`'monthly'` or `'annual'`), if any.
+  String? get activePlan => _demoPlan;
+
+  /// True when the user switched to strict Free tier to test the Pro paywall lock.
+  bool get freemiumGateLocked =>
+      _freemiumGateLocked && !active && !demoTrialActive;
+
+  /// True when Pro features are accessible.
+  bool get hasProAccess => !freemiumGateLocked;
+
   void _changed() {
     if (!_closed) notifyListeners();
+  }
+
+  /// Activates the interactive 3-day Pro trial on tablet/emulator builds.
+  void activateDemoTrial(String plan) {
+    _demoPlan = plan == 'annual' ? 'annual' : 'monthly';
+    _freemiumGateLocked = false;
+    final price = _demoPlan == 'annual' ? annualPriceLabel : monthlyPriceLabel;
+    message =
+        'AutoSense Pro 3-day trial active (${_demoPlan!.toUpperCase()} • $price). All Pro tools unlocked.';
+    _changed();
+  }
+
+  /// Switches to the locked Free tier so the user can test the Freemium paywall.
+  void switchToFreeTier() {
+    _demoPlan = null;
+    _freemiumGateLocked = true;
+    message =
+        'Free tier active (EGP 0). Basic DTC lookup & HP calculator are free; Pro tools require AutoSense Pro.';
+    _changed();
   }
 
   Future<void> initialize() async {

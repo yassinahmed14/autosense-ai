@@ -1,3 +1,7 @@
+import 'package:autosense_ai/core/network/api_client.dart';
+import 'package:autosense_ai/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:autosense_ai/features/diagnostics/presentation/lookup_screen.dart';
+import 'package:autosense_ai/features/home/presentation/home_screen.dart';
 import 'package:autosense_ai/features/privacy/presentation/privacy_screen.dart';
 import 'package:autosense_ai/features/subscription/data/subscription_controller.dart';
 import 'package:autosense_ai/features/subscription/presentation/subscription_screen.dart';
@@ -76,5 +80,48 @@ void main() {
     await tester.tap(find.text('Privacy & support'));
     await tester.pumpAndSettle();
     expect(find.byType(PrivacyScreen), findsOneWidget);
+  });
+  testWidgets(
+      'freemium mode keeps DTC library free, gates Pro dashboard, and unlocks via 3-day trial',
+      (tester) async {
+    final controller = SubscriptionController('http://localhost');
+    final api = ApiClient(baseUrl: 'http://localhost');
+    addTearDown(controller.dispose);
+    addTearDown(api.close);
+
+    controller.switchToFreeTier();
+    expect(controller.freemiumGateLocked, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(home: HomeScreen(api: api, subscription: controller)),
+    );
+
+    // 1. Free feature (DTC library) opens without paywall.
+    await tester.scrollUntilVisible(find.text('DTC library'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('DTC library'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LookupScreen), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // 2. Pro feature (Open live dashboard) shows Freemium Pro paywall sheet.
+    await tester.scrollUntilVisible(find.text('Open live dashboard'), -200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Open live dashboard'));
+    await tester.pumpAndSettle();
+    expect(
+        find.text('Unlock Live OBD Dashboard & 10s Dyno Run'), findsOneWidget);
+
+    // 3. Tapping Unlock Annual activates 3-day trial and navigates to DashboardScreen.
+    await tester.tap(
+        find.text('Unlock Annual • 3 days free, then EGP 999/yr (Save 16%)'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(controller.demoTrialActive, isTrue);
+    expect(controller.activePlan, 'annual');
+    expect(find.byType(DashboardScreen), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 2));
   });
 }
