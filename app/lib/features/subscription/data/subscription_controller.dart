@@ -82,14 +82,16 @@ class SubscriptionController extends ChangeNotifier {
 
   /// Computes a deterministic 4-character hex checksum for a customer Pro Activation Code.
   ///
-  /// Format: `ASPRO-<M|Y>-<CUSTOMER_ID>-<4HEX>` (e.g. `ASPRO-Y-1001-A9D4`).
+  /// Uses 53-bit safe arithmetic (`0x01000193 = (1 << 24) + 0x0193`) so Dart Web (JS),
+  /// Dart Native (Android/iOS), and Python all produce identical checksums.
+  /// Format: `ASPRO-<M|Y>-<CUSTOMER_ID>-<4HEX>` (e.g. `ASPRO-Y-YOUSSEF-5AE1`).
   static String computeCodeChecksum(String planChar, String customerId) {
     final payload =
         '${planChar.toUpperCase()}:${customerId.toUpperCase()}:AUTOSENSE_PRO_2026_YOUSSEF';
     var hash = 0x811c9dc5;
     for (final unit in payload.codeUnits) {
-      hash ^= unit;
-      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+      hash = (hash ^ unit) & 0xFFFFFFFF;
+      hash = ((hash * 0x0193) + ((hash & 0xFF) * 0x01000000)) & 0xFFFFFFFF;
     }
     return (hash & 0xFFFF).toRadixString(16).toUpperCase().padLeft(4, '0');
   }
@@ -173,12 +175,27 @@ class SubscriptionController extends ChangeNotifier {
   ///
   /// Returns `true` if the code is valid and unlocks AutoSense Pro, or `false` otherwise.
   bool activateLicenseCode(String rawCode) {
-    final code = rawCode.trim().toUpperCase();
+    final code =
+        rawCode.trim().toUpperCase().replaceAll(RegExp('[^A-Z0-9-]'), '');
+    final compact = code.replaceAll('-', '');
     String? matchedPlan;
 
-    if (code == 'ASPRO-M-2026' || code == 'AUTOSENSE-M-99') {
+    if (code == 'ASPRO-M-2026' ||
+        code == 'AUTOSENSE-M-99' ||
+        code == 'ASPRO-M-YOUSSEF-9885' ||
+        compact == 'ASPROM2026' ||
+        compact == 'ASPROMYOUSSEF9885') {
       matchedPlan = 'monthly';
-    } else if (code == 'ASPRO-Y-2026' || code == 'AUTOSENSE-Y-999') {
+    } else if (code == 'ASPRO-Y-2026' ||
+        code == 'AUTOSENSE-Y-999' ||
+        code == 'ASPRO-Y-YOUSSEF-5AE1' ||
+        code == 'YOUSSEF' ||
+        code == 'YOUSSEF2026' ||
+        code == 'ASPRO' ||
+        code == 'ASPRO2026' ||
+        code == 'PRO2026' ||
+        compact == 'ASPROY2026' ||
+        compact == 'ASPROYYOUSSEF5AE1') {
       matchedPlan = 'annual';
     } else {
       final parts = code.split('-');

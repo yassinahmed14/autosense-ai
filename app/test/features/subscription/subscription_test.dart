@@ -136,6 +136,19 @@ void main() {
       ),
       isNull,
     );
+
+    // 5. Owner and customer promo codes work (even with accidental spaces or asterisks).
+    controller.switchToFreeTier();
+    expect(controller.activateLicenseCode('**ASPRO-Y-YOUSSEF-5AE1**'), isTrue);
+    expect(controller.activePlan, 'annual');
+    expect(controller.activateLicenseCode('ASPRO-M-YOUSSEF-9885'), isTrue);
+    expect(controller.activePlan, 'monthly');
+    expect(controller.activateLicenseCode('YOUSSEF2026'), isTrue);
+    expect(controller.activePlan, 'annual');
+    expect(controller.activateLicenseCode('ASPRO-Y-VIP001-7409'), isTrue);
+    expect(controller.activePlan, 'annual');
+    expect(controller.activateLicenseCode('ASPRO-M-CUST001-E6D5'), isTrue);
+    expect(controller.activePlan, 'monthly');
   });
   testWidgets('preview cannot start checkout and keeps support accessible',
       (tester) async {
