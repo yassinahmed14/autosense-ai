@@ -60,3 +60,10 @@ def test_privacy_and_terms_html_endpoints(client):
     assert "text/html" in terms.headers["content-type"]
     assert "AutoSense AI Subscription &amp; Service Terms" in terms.text
     assert "EGP 99.00/month" in terms.text
+
+    download = client.get("/download")
+    assert download.status_code == 200
+    assert "text/html" in download.headers["content-type"]
+    assert "AutoSense-AI-v1.0.0+6-release-signed.apk" in download.text
+    assert "https://yassinahmed14.github.io/autosense-ai/" in download.text
+
