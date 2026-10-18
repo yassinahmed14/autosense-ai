@@ -1,0 +1,108 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "created_at": "2026-10-12T00:00:00Z",
+  "engine": "rules-v1",
+  "source": "mock_obd",
+  "simulated": true,
+  "summary": "Preliminary possibilities based on supplied information; no failed part confirmed.",
+  "urgency": "urgent",
+  "urgency_reasons": [
+    "A reported misfire code warrants prompt professional review."
+  ],
+  "dtcs": [
+    {
+      "code": "P0300",
+      "found": true,
+      "entry": {
+        "code": "P0300",
+        "title": "Random/multiple cylinder misfire detected",
+        "explanation": "The controller reported irregular combustion across multiple cylinders.",
+        "possible_causes": [
+          "Ignition system issue",
+          "Fuel delivery issue",
+          "Intake air leak or mechanical issue"
+        ],
+        "next_checks": [
+          "Ask a technician to review freeze-frame and misfire counters",
+          "Have ignition, fuel delivery and compression tested before replacing parts"
+        ],
+        "coverage": "starter_generic"
+      },
+      "message": "Generic demo definition; verify against OEM service information."
+    },
+    {
+      "code": "P0171",
+      "found": true,
+      "entry": {
+        "code": "P0171",
+        "title": "System too lean (bank 1)",
+        "explanation": "Fuel control reported a lean condition on bank 1; this does not identify a failed part.",
+        "possible_causes": [
+          "Unmetered intake air",
+          "Fuel delivery issue",
+          "Air/fuel sensor measurement issue"
+        ],
+        "next_checks": [
+          "Have fuel trims reviewed under multiple operating conditions",
+          "Ask for intake leak and fuel pressure checks"
+        ],
+        "coverage": "starter_generic"
+      },
+      "message": "Generic demo definition; verify against OEM service information."
+    }
+  ],
+  "possible_causes": [
+    {
+      "title": "Ignition system issue",
+      "evidence": [
+        "P0300"
+      ],
+      "certainty": "unconfirmed"
+    },
+    {
+      "title": "Fuel delivery issue",
+      "evidence": [
+        "P0300",
+        "P0171"
+      ],
+      "certainty": "unconfirmed"
+    },
+    {
+      "title": "Intake air leak or mechanical issue",
+      "evidence": [
+        "P0300"
+      ],
+      "certainty": "unconfirmed"
+    },
+    {
+      "title": "Unmetered intake air",
+      "evidence": [
+        "P0171"
+      ],
+      "certainty": "unconfirmed"
+    },
+    {
+      "title": "Air/fuel sensor measurement issue",
+      "evidence": [
+        "P0171"
+      ],
+      "certainty": "unconfirmed"
+    }
+  ],
+  "next_steps": [
+    "Ask a technician to review freeze-frame and misfire counters",
+    "Have ignition, fuel delivery and compression tested before replacing parts",
+    "Have fuel trims reviewed under multiple operating conditions",
+    "Ask for intake leak and fuel pressure checks",
+    "Record when the issue occurs and preserve codes/freeze-frame data.",
+    "Have a qualified technician confirm the cause before replacing parts."
+  ],
+  "limitations": [
+    "Rule-based demo: no AI model, probabilities, or validated diagnostic accuracy.",
+    "Eight generic code definitions; manufacturer-specific coverage is not included.",
+    "Vehicle details are context only; rules are not tailored to make/model/year.",
+    "No live vehicle measurements were analyzed. Free text requires human review.",
+    "No codes does not mean no fault. Mock scans contain simulated evidence."
+  ],
+  "safety_message": "This is preliminary guidance, not a diagnosis or a determination that driving is safe. If overheating, oil-pressure warnings, braking/steering trouble, smoke, strong fuel smell, or a flashing check-engine light occurs, reach a safe stopping place and seek professional or roadside assistance. Follow your vehicle owner's manual."
+}

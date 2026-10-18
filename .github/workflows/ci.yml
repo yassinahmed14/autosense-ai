@@ -1,0 +1,27 @@
+name: Starter checks
+on: [push, pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r backend/requirements.lock.txt && pip install -e 'backend[dev]'
+      - run: ruff check backend && ruff format --check backend
+      - run: pytest backend/tests -q
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: mobile
+      - run: flutter analyze
+        working-directory: mobile
+      - run: flutter test
+        working-directory: mobile

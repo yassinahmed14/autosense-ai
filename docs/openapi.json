@@ -1,0 +1,555 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AutoSense AI Starter",
+    "description": "Local rule-based guidance. No authentication or persistence yet.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v1/billing/config": {
+      "get": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Billing Config",
+        "operationId": "billing_config_v1_billing_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/verify": {
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "summary": "Verify Purchase",
+        "operationId": "verify_purchase_v1_billing_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyPurchase"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dtc/{code}": {
+      "get": {
+        "summary": "Dtc Lookup",
+        "operationId": "dtc_lookup_v1_dtc__code__get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DtcLookup"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/diagnostics": {
+      "post": {
+        "summary": "Diagnostics",
+        "operationId": "diagnostics_v1_diagnostics_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiagnosticRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DiagnosticRequest": {
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/Vehicle"
+          },
+          "codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Codes"
+          },
+          "symptoms": {
+            "items": {
+              "$ref": "#/components/schemas/Symptom"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Symptoms"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Notes",
+            "default": ""
+          },
+          "safety_flags": {
+            "items": {
+              "$ref": "#/components/schemas/SafetyFlag"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Safety Flags"
+          },
+          "safety_check_completed": {
+            "type": "boolean",
+            "title": "Safety Check Completed",
+            "default": false
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "mock_obd",
+              "ble_obd",
+              "wifi_obd"
+            ],
+            "title": "Source",
+            "default": "manual"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "DiagnosticRequest"
+      },
+      "DiagnosticResult": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "engine": {
+            "type": "string",
+            "const": "rules-v1",
+            "title": "Engine",
+            "default": "rules-v1"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "mock_obd",
+              "ble_obd",
+              "wifi_obd"
+            ],
+            "title": "Source"
+          },
+          "simulated": {
+            "type": "boolean",
+            "title": "Simulated"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "unassessed",
+              "inspection",
+              "urgent",
+              "stop_safely"
+            ],
+            "title": "Urgency"
+          },
+          "urgency_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Urgency Reasons"
+          },
+          "dtcs": {
+            "items": {
+              "$ref": "#/components/schemas/DtcLookup"
+            },
+            "type": "array",
+            "title": "Dtcs"
+          },
+          "possible_causes": {
+            "items": {
+              "$ref": "#/components/schemas/PossibleCause"
+            },
+            "type": "array",
+            "title": "Possible Causes"
+          },
+          "next_steps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Next Steps"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "safety_message": {
+            "type": "string",
+            "title": "Safety Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "source",
+          "simulated",
+          "summary",
+          "urgency",
+          "urgency_reasons",
+          "dtcs",
+          "possible_causes",
+          "next_steps",
+          "limitations",
+          "safety_message"
+        ],
+        "title": "DiagnosticResult"
+      },
+      "DtcEntry": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "possible_causes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Possible Causes"
+          },
+          "next_checks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Next Checks"
+          },
+          "coverage": {
+            "type": "string",
+            "const": "starter_generic",
+            "title": "Coverage",
+            "default": "starter_generic"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "explanation",
+          "possible_causes",
+          "next_checks"
+        ],
+        "title": "DtcEntry"
+      },
+      "DtcLookup": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "found": {
+            "type": "boolean",
+            "title": "Found"
+          },
+          "entry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DtcEntry"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "found",
+          "message"
+        ],
+        "title": "DtcLookup"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PossibleCause": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "certainty": {
+            "type": "string",
+            "const": "unconfirmed",
+            "title": "Certainty",
+            "default": "unconfirmed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "evidence"
+        ],
+        "title": "PossibleCause"
+      },
+      "SafetyFlag": {
+        "type": "string",
+        "enum": [
+          "flashing_mil",
+          "overheating",
+          "oil_pressure_warning",
+          "brake_or_steering_issue",
+          "smoke_or_fuel_smell"
+        ],
+        "title": "SafetyFlag"
+      },
+      "Symptom": {
+        "type": "string",
+        "enum": [
+          "rough_idle",
+          "hard_start",
+          "reduced_power",
+          "poor_fuel_economy",
+          "unusual_noise"
+        ],
+        "title": "Symptom"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Vehicle": {
+        "properties": {
+          "make": {
+            "type": "string",
+            "maxLength": 60,
+            "title": "Make",
+            "default": ""
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 60,
+            "title": "Model",
+            "default": ""
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 2100.0,
+                "minimum": 1900.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Vehicle"
+      },
+      "VerifyPurchase": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 10,
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "VerifyPurchase"
+      }
+    }
+  }
+}

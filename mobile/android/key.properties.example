@@ -1,0 +1,6 @@
+# Copy to key.properties locally. Never commit or include the real file in archives.
+# Prefer an absolute path with forward slashes on Windows.
+storeFile=D:/private/autosense-upload.jks
+storePassword=REPLACE_LOCALLY
+keyAlias=autosense-upload
+keyPassword=REPLACE_LOCALLY

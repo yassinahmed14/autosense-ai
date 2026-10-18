@@ -1,0 +1,7 @@
+{
+  "API_BASE_URL": "https://api.example.invalid",
+  "PRIVACY_POLICY_URL": "https://example.invalid/privacy",
+  "TERMS_URL": "https://example.invalid/terms",
+  "SUPPORT_EMAIL": "REPLACE_WITH_PUBLIC_SUPPORT_EMAIL",
+  "ENABLE_SUBSCRIPTIONS": true
+}
