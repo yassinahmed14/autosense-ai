@@ -1,6 +1,6 @@
 # CLAUDE.md — AutoSense AI project context
 
-> **Last updated:** 2026-10-18 — v1.0.0+6 shipped: 100% Free Forever Edition, 56-code SAE J2012 catalog (`P`/`B`/`C`/`U`), 35 global car brands, Hybrid Smart Mode (`<5ms` offline engine + cloud API), live Vercel deploy (`https://autosense-api.vercel.app`), 138 passing tests, and verified on both Pixel 7 emulator (`emulator-5554`) and wireless Samsung tablet (`GT-N8000`).
+> **Last updated:** 2026-10-18 — v1.0.0+6 Google Play Ready: Signed Release `.aab` (`AutoSense-AI-v1.0.0+6-release-signed.aab`), live HTTPS Privacy Policy & Terms (`https://autosense-api.vercel.app/privacy` & `/terms`), Freemium + AutoSense Pro (`EGP 99/mo` & `EGP 999/yr` + 3-day trial), 56-code SAE J2012 catalog (`P`/`B`/`C`/`U`), 35 global car brands, Hybrid Smart Mode (`<5ms` offline engine + cloud API), 140 passing tests, and verified on both Pixel 7 emulator (`emulator-5554`) and wireless Samsung tablet (`GT-N8000`).
 >
 > This file is the project's "memory". AI agents read it automatically
 > (via `AGENTS.md`) and **must update it after every meaningful change**.
@@ -8,7 +8,7 @@
 
 ## 1. What is this?
 
-**AutoSense AI** is a 100% free car-diagnostics and live telemetry app. You plug an OBD-II
+**AutoSense AI** is a Freemium + Pro car-diagnostics and live telemetry app. You plug an OBD-II
 scanner into your car (or use the built-in simulator), and the app:
 
 - reads 56 generic trouble codes across all 4 vehicle systems (`P` Powertrain, `C` Chassis/ABS, `B` Body/SRS, `U` Network/CAN) and explains them in plain language,
@@ -32,11 +32,12 @@ It gives **preliminary guidance only** — never a definitive diagnosis.
 |---|---|
 | App version | **1.0.0+6** (Freemium + AutoSense Pro: `EGP 99/mo` or `EGP 999/yr` + 3-day trial) |
 | API live URL | **`https://autosense-api.vercel.app`** (live & smoke-tested on Vercel Hobby) |
-| Web build | Built in `app/build/web` pointing to `https://autosense-api.vercel.app` |
-| Android APK | `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-debug.apk` |
+| Live Legal URLs | **`https://autosense-api.vercel.app/privacy`** & **`https://autosense-api.vercel.app/terms`** (`youssefahmed4010@gmail.com`) |
+| Signed Google Play `.aab` | **`D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-release-signed.aab`** (`52.4 MB`, signed with `autosense-upload.jks`) |
+| Android Debug APK | `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-debug.apk` |
 | Emulator QA | **Passed (0 crashes)** on `emulator-5554` (Pixel 7, API 36, `1080x2400`) |
 | Wireless Tablet QA | **Passed (0 crashes)** on `192.168.100.199:48729` (Samsung `GT-N8000`, Android 11, `1280x800`) |
-| Automated Tests | **139 passed** (`70` FastAPI `pytest` + `69` Flutter unit/widget/protocol tests; `0` lint issues) |
+| Automated Tests | **140 passed** (`71` FastAPI `pytest` + `69` Flutter unit/widget/protocol tests; `0` lint issues) |
 | Bluetooth/Wi‑Fi scanner | BLE + Wi-Fi ELM327 drivers & unit tests verified; physical car ECU test requires plugging adapter into a real car |
 
 ## 3. Repository map
@@ -110,6 +111,7 @@ and npm cache live on `D:\CodexWork\…` (handled by `dev_env.ps1`).
 - 2026-10-18 — **Hybrid Smart Mode (A3):** `ApiClient` attempts the cloud API first (4s timeout) and automatically falls back in `<5ms` to on-device `OfflineDiagnosticEngine`.
 - 2026-10-18 — **Live Cloud Deployment (A4):** Deployed FastAPI backend to Vercel Hobby (`https://autosense-api.vercel.app`) and verified on both `emulator-5554` and wireless tablet `GT-N8000`.
 - 2026-10-18 — **Freemium + AutoSense Pro Subscription Fee:** Added **Monthly (`EGP 99/month`, ~$2.99/mo)** and **Annual (`EGP 999/year`, ~$24.99/yr, Save 16%)** plans with a **3-day free trial**. Basic DTC lookup (`56 codes`) and HP calculator are always Free; Pro unlocks Live OBD Scanner, Clear Codes, 10s Dyno Run, and Full AI Guidance, with interactive tablet/demo trial controls plus Google Play Billing support.
+- 2026-10-18 — **Google Play Store Package (`prepare google play`):** Generated private Upload Keystore (`D:\AutoSense AI\releases\signing\autosense-upload.jks`), built and verified signed release bundle (`D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-release-signed.aab`), deployed live HTTPS `/privacy` and `/terms` pages on Vercel (`youssefahmed4010@gmail.com`), and updated `distribution/google-play/` with real phone and 10-inch tablet screenshots.
 
 ## 9. Working with the owner
 
@@ -125,6 +127,7 @@ recommended option.
 | **App (frontend)** | What users see and tap on their phone/tablet. Here: Flutter in `app/`. |
 | **API (backend)** | The app's "waiter": the phone asks it a question, it fetches the answer from the server. Here: `api/`. |
 | **Freemium & Paywall** | Giving basic tools for free (like DTC code lookup & HP calculator) so anyone can use the app, while showing an upgrade sheet ("paywall") when someone taps a Pro feature. |
+| **Upload Keystore (`.jks`)** | Your private digital passport (`autosense-upload.jks`) that stamps your `.aab` file so Google Play knows every update truly comes from you. |
 | **Hybrid Smart Mode (Offline Fallback)** | A backup brain built right inside the app: if your phone has no internet in a garage, the app answers in under 5 milliseconds by itself. |
 | **SAE J2012 (`P`, `B`, `C`, `U` codes)** | The world standard for car trouble codes: **P** = Powertrain (engine/gearbox), **C** = Chassis (ABS/brakes), **B** = Body (airbags), **U** = Network (computer wiring). |
 | **Readiness Monitors (SAE J1979)** | Self-tests your car's computer runs while you drive to prove emissions systems work before a government inspection. |

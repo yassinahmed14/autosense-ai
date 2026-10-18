@@ -8,7 +8,7 @@ from .core.errors import register_error_handlers
 from .core.logging import configure_logging
 from .core.middleware import REQUEST_ID_HEADER, RequestIdMiddleware
 from .core.settings import Settings, get_settings
-from .routers import billing, diagnostics, dtc, health
+from .routers import billing, diagnostics, dtc, health, legal
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -34,6 +34,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     api.include_router(billing.router)
     api.include_router(health.router)
+    api.include_router(legal.router)
     api.include_router(dtc.router)
     api.include_router(diagnostics.router)
     return api

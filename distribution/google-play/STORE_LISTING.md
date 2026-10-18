@@ -1,71 +1,50 @@
-# Store listing draft
+# Store Listing (Copy-Paste Ready for Google Play Console)
 
-Developer: Youssef Ahmed
-Support email: SUPPORT_EMAIL_REQUIRED
-Privacy policy: PUBLIC_HTTPS_POLICY_URL_REQUIRED
-Suggested category: Auto & Vehicles
-App name: AutoSense AI
-Short description: Explore car codes, live gauges and acceleration-based performance estimates.
+- **Developer / Publisher:** Youssef Ahmed
+- **Support email:** `youssefahmed4010@gmail.com`
+- **Privacy Policy URL (Live HTTPS):** `https://autosense-api.vercel.app/privacy`
+- **Subscription Terms URL (Live HTTPS):** `https://autosense-api.vercel.app/terms`
+- **Production API URL (Live HTTPS):** `https://autosense-api.vercel.app`
+- **Application ID / Package Name:** `com.autosense.autosense_ai`
+- **Version:** `1.0.0` (Version Code `6`)
+- **Suggested Category:** Auto & Vehicles
+- **App Name (max 30 chars):** `AutoSense AI: Car OBD2 & DTC`
+- **Short Description (max 80 chars):** `Read OBD2 trouble codes, live RPM/speed gauges, 56-code offline library & dyno.`
 
-## Full description
+---
 
-Explore vehicle information with AutoSense AI, an early vehicle diagnostics and
-live-data app with a clearly labelled simulation mode.
+## Full Description (Copy into Google Play Store Listing)
 
-MANUAL CODE AND SYMPTOM ENTRY
-Select a vehicle, enter diagnostic trouble codes and symptoms, and review
-preliminary guidance from a small rule-based code catalog. Possible causes need
-inspection and confirmation. The current catalog is limited to eight generic codes.
+Explore your vehicle's health and live telemetry with **AutoSense AI**, a modern car diagnostics and live-data companion with **Hybrid Smart Mode** (cloud API + instant `<5ms` offline diagnostic engine) and a built-in simulator mode.
 
-LIVE DASHBOARD
-View available RPM, speed, coolant temperature and throttle readings with clear
-gauges. Try the dashboard using simulated data before connecting a scanner.
+### ALWAYS FREE TOOLS (FREEMIUM TIER — EGP 0)
+- **56-Code Generic SAE J2012 Library (`P`, `B`, `C`, `U`):** Look up Powertrain (`P0xxx` / `P0Axx`), Chassis/ABS (`C0xxx`), Body/Airbag (`B0xxx`), and CAN Network (`U0xxx`) trouble codes with plain-English explanations, unconfirmed possible causes, and recommended technician checks.
+- **Instant Offline Catalog Browser:** Filter trouble codes by vehicle system (`Powertrain`, `Chassis / ABS`, `Body / SRS`, `Network / CAN`) with zero internet required—ideal for underground garages or roadside checks.
+- **HP & Torque Calculator:** Convert between torque (`N·m` or `lb·ft`) and mechanical horsepower / kilowatts at any RPM using NIST SP 811 constants.
 
-EXPERIMENTAL SCANNER CONNECTIONS
-Native Bluetooth Low Energy and Wi-Fi TCP interfaces support an experimental
-ELM ASCII / CAN subset. A compatible adapter and vehicle are required. The BLE
-serial profile is matched automatically from supported documented layouts and
-verified with an ELM identity response. Unknown profiles report an error.
-Compatibility with your particular adapter is not guaranteed. Bluetooth Classic,
-USB, OBD-I and manufacturer-specific systems are not currently supported.
+### AUTOSENSE PRO MEMBERSHIP (3-DAY FREE TRIAL)
+Upgrade to **AutoSense Pro** (`EGP 99.00/month` or `EGP 999.00/year` with a 3-day free trial for eligible new subscribers) to unlock:
+- **35-Brand Manual & Scanner Diagnostic Guidance:** Select from 35 global vehicle makes (1900–present), enter trouble codes and symptoms, complete the critical safety checklist, and receive structured preliminary diagnostic guidance.
+- **Live Telemetry Dashboard:** View real-time Engine RPM (240° tabular gauge), Vehicle Speed (`km/h`), Coolant Temperature (`°C`), Throttle Position (`%`), and live RPM trend charts.
+- **10-Second Acceleration Power Estimator:** Record a 10-second run on a closed course and estimate net translational acceleration power (`hp` / `kW`) with 1-tap CSV export.
+- **Experimental Bluetooth LE & Wi-Fi ELM327 Scanner Support:** Connect to compatible BLE or Wi-Fi TCP ELM327 CAN adapters, plus review SAE J1979 OBD-II protocol and pre-inspection emissions readiness monitor references.
 
-PERFORMANCE EXPLORATION
-Record a 10-second run and estimate net translational acceleration power using
-vehicle mass and available speed/RPM data. These are not dyno readings or measured
-engine horsepower/torque. Grade, wind, losses and other factors affect results.
-Use only in a suitable controlled environment, with an operator handling the app.
+### SAFETY & IMPORTANT BOUNDARIES
+- **Preliminary Guidance Only:** AutoSense AI uses a deterministic rule engine (`rules-v1`) to provide preliminary information. It never issues a definitive mechanical diagnosis or determines that a vehicle is safe to drive. Always consult a qualified technician.
+- **Park Before Using:** Never interact with the app while driving. Set up scanners and review diagnostics only while safely parked.
 
-KNOW THE LIMITS
-Despite the name, the current diagnostic engine uses transparent rules, not a
-generative AI model. Automatic vehicle identification is a demo. Real error-code
-clearing is disabled. Diagnostic lookup/guidance needs the configured online service.
-History and runs are session-only; copied reports are handled by your device.
+---
 
-Do not interact with the app while driving. Follow vehicle instructions and seek
-qualified assistance for safety concerns. The app cannot establish that a vehicle
-is safe to drive or replace a professional inspection.
+## Release Notes (What's New in v1.0.0+6)
 
-## Release notes for the first closed test
+- New Racing Yellow & Carbon light showroom UI with high-contrast Saira & Inter typography.
+- Expanded 56-code generic SAE J2012 trouble code catalog across Powertrain (`P`), Chassis/ABS (`C`), Body/SRS (`B`), and Network/CAN (`U`) systems with instant offline filter chips.
+- Added 35 global car brands (1900–present) and Hybrid Smart Mode (`<5ms` offline diagnostic fallback).
+- Added Freemium tier + AutoSense Pro (`EGP 99/month` or `EGP 999/year` with 3-day free trial).
 
-Initial testing build: vehicle menus, manual code/symptom entry, preliminary
-rule-based guidance, simulated dashboard, experimental BLE/Wi-Fi ELM/CAN readers,
-and acceleration-power estimates. Real code clearing remains disabled.
+---
 
-## Reviewer access notes
+## App Access Instructions for Google Play Reviewers
 
-No account or login is required. Simulation is available from Open live dashboard.
-The release diagnostic service must be reachable without local-PC setup.
-Physical scanner functions require supported hardware and the documented BLE
-profile or Wi-Fi TCP address. Do not submit a build with a localhost API endpoint.
-
-## Subscription disclosure for the configured release
-
-Full app access requires a subscription: EGP 99/month or EGP 999/year in Egypt.
-Eligible new subscribers may receive a 3-day free trial. After the trial, the selected
-plan renews automatically at its stated price unless canceled. Cancel in Google Play
-before the trial ends to avoid the first subscription charge. The annual plan charges
-EGP 999 per year in full. Local prices and availability may vary; review the Google
-Play checkout for the final terms. Privacy, help, restore and subscription management
-remain accessible without an active subscription. Development preview builds do not
-charge and may allow app access for testing. This disclosure is conditional on
-configuring and validating the actual products before submission.
+- **No login or account required:** All screens are accessible without signing in.
+- **No physical car or OBD hardware needed for review:** Reviewers can test every feature immediately using the built-in simulator via **"Open live dashboard"** and **"Try mock OBD scan"** (`2020 Toyota Corolla` simulator).

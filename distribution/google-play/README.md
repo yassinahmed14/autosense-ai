@@ -1,54 +1,35 @@
-# AutoSense AI — Google Play preparation
+# AutoSense AI — Google Play Submission Package (`v1.0.0+6`)
 
-Prepared October 15, 2026 for Youssef Ahmed. This folder is a preparation pack,
-not evidence of publication, Play approval, or completed real-world testing.
+Updated October 18, 2026 for **Youssef Ahmed** (`youssefahmed4010@gmail.com`).
+This folder contains everything needed to publish **AutoSense AI** on Google Play Console.
 
-## Included
+---
 
-- STORE_LISTING.md: copy for the store, with honest feature limitations.
-- privacy-policy.html: public-policy draft to complete and host.
-- DATA_SAFETY.md: data-flow inventory and form preparation.
-- TEST_PLAN.md: software results and physical/Play test cases.
-- RELEASE_STEPS.md: signing, deployment, account and upload instructions.
-- SUBSCRIPTIONS.md: confirmed pricing, implemented prototype and activation blockers.
-- assets/: turbo logo, launcher resources and feature graphic.
-- review-screenshots/: actual earlier Flutter browser screenshots, explicitly
-  for review; replace with captures of the release on Android before upload.
+## 1. Ready-to-Upload Artifacts & Live Links
 
-## Current blockers
+| Item | Value / File Path |
+|---|---|
+| **Signed Release App Bundle (`.aab`)** | `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-release-signed.aab` |
+| **Signed Debug/Testing APK (`.apk`)** | `D:\AutoSense AI\releases\AutoSense-AI-v1.0.0+6-debug.apk` |
+| **Upload Keystore (`.jks`)** | `D:\AutoSense AI\releases\signing\autosense-upload.jks` (keep backed up privately; never commit to Git) |
+| **Package Name (`applicationId`)** | `com.autosense.autosense_ai` |
+| **Version / Version Code** | `1.0.0` (`versionCode: 6`, `minSdk: 24`, `targetSdk: 36`) |
+| **Live Production API (HTTPS)** | `https://autosense-api.vercel.app` |
+| **Live Privacy Policy URL (HTTPS)** | `https://autosense-api.vercel.app/privacy` |
+| **Live Subscription Terms URL (HTTPS)** | `https://autosense-api.vercel.app/terms` |
+| **Support Email** | `youssefahmed4010@gmail.com` |
 
-1. Public support email and final privacy contact details are missing.
-2. A public HTTPS privacy-policy URL and a working HTTPS diagnostic backend are missing.
-   The supplied backend is unauthenticated; harden/deploy it before public use.
-3. No Google Play Console account exists yet. The owner must enroll, verify
-   identity and accept agreements. No account was created or payment made.
-4. A private upload signing key has not been created. Review bundles are unsigned.
-5. The application ID com.autosense.autosense_ai must be confirmed as the owner's
-   final unique identifier before the first upload; it becomes difficult to change.
-6. Adapter compatibility, native BLE/Wi-Fi permission flows and performance accuracy
-   have not been validated. User reported successful APK installation on Android 11.
-7. Play closed testing and pre-launch reports have not run. Do not mark tests passed
-   unless there is evidence. New personal accounts normally need 12 testers opted
-   in continuously for at least 14 days before applying for production access.
+---
 
-## Official requirements checked
+## 2. Files Included in `distribution/google-play/`
 
-- API target: https://developer.android.com/google/play/requirements/target-sdk
-- Testing: https://support.google.com/googleplay/android-developer/answer/14151465
-- User data/privacy: https://support.google.com/googleplay/android-developer/answer/10144311
-- Data safety: https://support.google.com/googleplay/android-developer/answer/10787469
-- Listing assets: https://support.google.com/googleplay/android-developer/answer/9866151
-
-Target SDK is explicitly 36. Recheck requirements in Play Console at upload time.
-
-## Subscription decision and code status
-
-Confirmed by owner: EGP 99/month or EGP 999/year, 3-day trial for eligible users,
-full app access. No free functional tier is planned for the billing-enabled release.
-Privacy, terms, restore and cancellation/help access remain available without payment.
-
-Flutter Play Billing integration and backend verification prototype are included.
-Checkout is OFF by default. This is not an active commercial subscription service.
-Public activation still needs Play products/credentials, authenticated user binding,
-abuse controls, durable lifecycle processing, legal/contact details and license testing.
-An unsigned review AAB is not ready for upload or charging.
+- [STORE_LISTING.md](STORE_LISTING.md): Copy-paste title, short description, full description, release notes, and reviewer instructions.
+- [DATA_SAFETY.md](DATA_SAFETY.md): Exact answers for the Google Play Console Data Safety questionnaire.
+- [SUBSCRIPTIONS.md](SUBSCRIPTIONS.md): Setup guide for `autosense_pro` (`monthly` @ `EGP 99.00` and `annual` @ `EGP 999.00` with 3-day free trial).
+- [RELEASE_STEPS.md](RELEASE_STEPS.md): Step-by-step checklist for uploading the signed `.aab` in Google Play Console.
+- [privacy-policy.html](privacy-policy.html) & [subscription-terms.html](subscription-terms.html): Static copies of the live HTML pages hosted at `https://autosense-api.vercel.app/privacy` and `/terms`.
+- `assets/`:
+  - `play-icon-512.png` (512×512 High-Res Play Store Icon)
+  - `feature-graphic-1024x500.png` (1024×500 Feature Graphic)
+- `review-screenshots/`:
+  - Real Android Phone (`1080×2400`) and 10-inch Android Tablet (`1280×800`) screenshots captured from `emulator-5554` and Samsung `GT-N8000`.

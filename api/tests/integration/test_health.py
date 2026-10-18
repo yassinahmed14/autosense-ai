@@ -46,3 +46,17 @@ def test_production_app_builds_with_json_logs():
     app = create_app(Settings(_env_file=None, app_env="production"))
     with TestClient(app) as client:
         assert client.get("/health").status_code == 200
+
+
+def test_privacy_and_terms_html_endpoints(client):
+    privacy = client.get("/privacy")
+    assert privacy.status_code == 200
+    assert "text/html" in privacy.headers["content-type"]
+    assert "AutoSense AI Privacy Policy" in privacy.text
+    assert "youssefahmed4010@gmail.com" in privacy.text
+
+    terms = client.get("/terms")
+    assert terms.status_code == 200
+    assert "text/html" in terms.headers["content-type"]
+    assert "AutoSense AI Subscription &amp; Service Terms" in terms.text
+    assert "EGP 99.00/month" in terms.text

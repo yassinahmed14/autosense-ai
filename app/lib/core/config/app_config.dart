@@ -16,14 +16,23 @@ abstract final class AppConfig {
     'ENABLE_SUBSCRIPTIONS',
   );
 
-  /// Public privacy-policy URL. Empty until configured for store release.
-  static const privacyPolicyUrl = String.fromEnvironment('PRIVACY_POLICY_URL');
+  /// Public HTTPS privacy-policy URL hosted on Vercel.
+  static const privacyPolicyUrl = String.fromEnvironment(
+    'PRIVACY_POLICY_URL',
+    defaultValue: 'https://autosense-api.vercel.app/privacy',
+  );
 
-  /// Public terms-of-service URL. Empty until configured for store release.
-  static const termsUrl = String.fromEnvironment('TERMS_URL');
+  /// Public HTTPS terms-of-service URL hosted on Vercel.
+  static const termsUrl = String.fromEnvironment(
+    'TERMS_URL',
+    defaultValue: 'https://autosense-api.vercel.app/terms',
+  );
 
-  /// Public support e-mail address. Empty until configured for store release.
-  static const supportEmail = String.fromEnvironment('SUPPORT_EMAIL');
+  /// Public support e-mail address.
+  static const supportEmail = String.fromEnvironment(
+    'SUPPORT_EMAIL',
+    defaultValue: 'youssefahmed4010@gmail.com',
+  );
 
   /// Human-readable privacy-policy value shown in the privacy screen.
   static const privacyPolicyLabel = privacyPolicyUrl == ''
