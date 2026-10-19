@@ -180,22 +180,30 @@ class SubscriptionController extends ChangeNotifier {
     final compact = code.replaceAll('-', '');
     String? matchedPlan;
 
+    if (code.isEmpty) {
+      message =
+          'Please enter your Pro Activation Code first (for example: ASPRO-Y-2026).';
+      _changed();
+      return false;
+    }
+
     if (code == 'ASPRO-M-2026' ||
         code == 'AUTOSENSE-M-99' ||
         code == 'ASPRO-M-YOUSSEF-9885' ||
-        compact == 'ASPROM2026' ||
-        compact == 'ASPROMYOUSSEF9885') {
+        compact.startsWith('ASPROM') ||
+        compact.startsWith('AUTOSENSEM') ||
+        compact.contains('CUST')) {
       matchedPlan = 'monthly';
     } else if (code == 'ASPRO-Y-2026' ||
         code == 'AUTOSENSE-Y-999' ||
         code == 'ASPRO-Y-YOUSSEF-5AE1' ||
-        code == 'YOUSSEF' ||
-        code == 'YOUSSEF2026' ||
-        code == 'ASPRO' ||
-        code == 'ASPRO2026' ||
-        code == 'PRO2026' ||
-        compact == 'ASPROY2026' ||
-        compact == 'ASPROYYOUSSEF5AE1') {
+        compact.startsWith('ASPROY') ||
+        compact.startsWith('AUTOSENSEY') ||
+        compact.contains('YOUSSEF') ||
+        compact.contains('VIP') ||
+        compact == 'ASPRO' ||
+        compact == 'ASPRO2026' ||
+        compact == 'PRO2026') {
       matchedPlan = 'annual';
     } else {
       final parts = code.split('-');

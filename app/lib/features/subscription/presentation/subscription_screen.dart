@@ -133,8 +133,20 @@ class SubscriptionScreen extends StatefulWidget {
                   TextField(
                     controller: codeController,
                     textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (value) {
+                      final ok = controller.activateLicenseCode(value);
+                      if (ok) {
+                        Navigator.of(sheetContext).pop();
+                        onUnlocked();
+                      } else {
+                        setSheetState(() {
+                          errorText = 'Invalid code. Try ASPRO-Y-2026.';
+                        });
+                      }
+                    },
                     decoration: InputDecoration(
-                      labelText: 'Have a Pro Activation Code?',
+                      labelText: 'Have a Promo / Activation Code?',
                       hintText: 'e.g. ASPRO-Y-2026',
                       errorText: errorText,
                       suffixIcon: IconButton(
@@ -148,12 +160,29 @@ class SubscriptionScreen extends StatefulWidget {
                             onUnlocked();
                           } else {
                             setSheetState(() {
-                              errorText = 'Invalid code. Check and try again.';
+                              errorText = 'Invalid code. Try ASPRO-Y-2026.';
                             });
                           }
                         },
                       ),
                     ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SecondaryActionButton(
+                    icon: Icons.vpn_key_outlined,
+                    label: 'Activate Promo Code',
+                    onPressed: () {
+                      final ok =
+                          controller.activateLicenseCode(codeController.text);
+                      if (ok) {
+                        Navigator.of(sheetContext).pop();
+                        onUnlocked();
+                      } else {
+                        setSheetState(() {
+                          errorText = 'Invalid code. Try ASPRO-Y-2026.';
+                        });
+                      }
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Center(
@@ -247,6 +276,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   void _verifyScreenshotAndIssueCode() {
+    final candidateCode = _codeInput.text.trim().isNotEmpty
+        ? _codeInput.text.trim()
+        : _refInput.text.trim();
+    if (_screenshotBytes == null &&
+        candidateCode.isNotEmpty &&
+        controller.activateLicenseCode(candidateCode)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('AutoSense Pro Activated! All Pro tools are now unlocked.'),
+          ),
+        );
+      }
+      return;
+    }
     if (_screenshotBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -281,14 +326,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   void _redeemCode() {
-    final ok = controller.activateLicenseCode(_codeInput.text);
+    final raw = _codeInput.text.trim().isNotEmpty
+        ? _codeInput.text
+        : _refInput.text;
+    final ok = controller.activateLicenseCode(raw);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             ok
                 ? 'AutoSense Pro Activated! All Pro tools are now unlocked.'
-                : 'Invalid Pro Activation Code. Contact ${SubscriptionController.supportEmail} for assistance.',
+                : controller.message,
           ),
         ),
       );
@@ -534,9 +582,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       const SizedBox(height: AppSpacing.sm),
                       TextField(
                         controller: _refInput,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _verifyScreenshotAndIssueCode(),
                         decoration: const InputDecoration(
-                          labelText: 'InstaPay Reference Number',
-                          hintText: 'e.g. 429103847561',
+                          labelText: 'InstaPay Reference Number (or Promo Code)',
+                          hintText: 'e.g. 429103847561 or ASPRO-Y-2026',
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
@@ -622,6 +672,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       TextField(
                         controller: _codeInput,
                         textCapitalization: TextCapitalization.characters,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _redeemCode(),
                         decoration: const InputDecoration(
                           labelText: 'Pro Activation Code',
                           hintText: 'e.g. ASPRO-Y-2026',
